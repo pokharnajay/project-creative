@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { createClient } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export async function GET(request) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user from Supabase
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user.id) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -18,7 +20,7 @@ export async function GET(request) {
     let query = supabaseAdmin
       .from('images')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -48,9 +50,11 @@ export async function GET(request) {
 
 export async function DELETE(request) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user from Supabase
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user.id) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -69,7 +73,7 @@ export async function DELETE(request) {
       .from('images')
       .select('*')
       .eq('id', imageId)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (fetchError || !image) {
@@ -105,9 +109,11 @@ export async function DELETE(request) {
 
 export async function PATCH(request) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user from Supabase
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user.id) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -125,7 +131,7 @@ export async function PATCH(request) {
       .from('images')
       .select('*')
       .eq('id', imageId)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (fetchError || !image) {

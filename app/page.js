@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
@@ -24,7 +24,7 @@ if (typeof window !== 'undefined') {
 }
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
   const heroRef = useRef();
   const featuresRef = useRef();
@@ -32,10 +32,10 @@ export default function Home() {
   const modelsRef = useRef();
 
   useEffect(() => {
-    if (status === 'authenticated') {
+    if (!loading && isAuthenticated) {
       router.push('/dashboard');
     }
-  }, [status, router]);
+  }, [loading, isAuthenticated, router]);
 
   useEffect(() => {
     // Hero animation
@@ -110,7 +110,7 @@ export default function Home() {
     }
   }, []);
 
-  if (status === 'loading') {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

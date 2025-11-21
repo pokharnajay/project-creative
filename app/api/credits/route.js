@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { createClient } from '@/lib/supabase-server';
 import { getUserCredits, addCredits, getCreditHistory } from '@/utils/credits';
 
 export async function GET(request) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user from Supabase
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user.id) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -14,11 +16,11 @@ export async function GET(request) {
     const action = searchParams.get('action');
 
     if (action === 'history') {
-      const history = await getCreditHistory(session.user.id);
+      const history = await getCreditHistory(user.id);
       return NextResponse.json({ history });
     }
 
-    const credits = await getUserCredits(session.user.id);
+    const credits = await getUserCredits(user.id);
     return NextResponse.json({ credits });
   } catch (error) {
     console.error('Error fetching credits:', error);
@@ -31,9 +33,11 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user from Supabase
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user.id) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -47,7 +51,7 @@ export async function POST(request) {
     }
 
     const newCredits = await addCredits(
-      session.user.id,
+      user.id,
       amount,
       type,
       description
