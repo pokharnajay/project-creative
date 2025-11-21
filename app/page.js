@@ -14,9 +14,9 @@ import InfiniteCarousel from '@/components/landing/InfiniteCarousel';
 import Model3DShowcase from '@/components/landing/Model3DShowcase';
 
 // Dynamically import 3D component (client-side only)
-const Hero3D = dynamic(() => import('@/components/landing/Hero3D'), {
+const RubiksCube3D = dynamic(() => import('@/components/landing/RubiksCube3D'), {
   ssr: false,
-  loading: () => <div className="w-full h-full bg-gray-100" />,
+  loading: () => <div className="w-full h-full bg-transparent" />,
 });
 
 if (typeof window !== 'undefined') {
@@ -128,79 +128,121 @@ export default function Home() {
       {/* Hero Section */}
       <section
         ref={heroRef}
-        className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gray-50"
+        className="relative min-h-screen flex items-center overflow-hidden bg-gray-50"
       >
-        {/* 3D Background */}
-        <div className="absolute inset-0 opacity-30">
-          <Hero3D />
-        </div>
-
-        {/* Hero Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-32 text-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            className="inline-block mb-6 px-6 py-2 bg-white border border-gray-200 rounded-full shadow-sm"
-          >
-            <span className="text-gray-700 font-medium">AI-Powered Image Generation</span>
-          </motion.div>
-
-          <h1 className="hero-text text-6xl md:text-7xl lg:text-8xl font-bold mb-6 text-gray-900">
-            Visualize Beyond
-            <br />
-            <span className="text-gray-600">Reality</span>
-          </h1>
-
-          <p className="hero-text text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto">
-            Transform ordinary product photos into extraordinary advertising campaigns with AI.
-            <span className="block mt-2 text-gray-800 font-medium">
-              Professional. Stunning. Instant.
-            </span>
-          </p>
-
-          <div className="hero-text flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button
-              size="lg"
-              onClick={() => router.push('/auth/signin')}
-              className="bg-gray-900 hover:bg-gray-800 text-white text-lg px-8 py-4 shadow-lg"
-            >
-              Start Creating Free
-              <svg
-                className="w-5 h-5 ml-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+        {/* Hero Content - Two Column Layout */}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-32 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Side - Text Content */}
+            <div className="space-y-8">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8 }}
+                className="inline-block px-6 py-2 bg-white border border-gray-200 rounded-full shadow-sm"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => {
-                document.getElementById('showcase').scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="text-lg px-8 py-4 bg-white border-2 border-gray-300 text-gray-900 hover:bg-gray-50"
+                <span className="text-gray-700 font-medium">AI-Powered Image Generation</span>
+              </motion.div>
+
+              <h1 className="hero-text text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
+                Visualize Beyond
+                <br />
+                <span className="text-gray-600">Reality</span>
+              </h1>
+
+              <p className="hero-text text-lg md:text-xl text-gray-600 max-w-xl">
+                Transform ordinary product photos into extraordinary advertising campaigns with AI.
+                <span className="block mt-3 text-gray-800 font-medium text-xl">
+                  Professional. Stunning. Instant.
+                </span>
+              </p>
+
+              <div className="hero-text flex flex-col sm:flex-row gap-4 pt-4">
+                <Button
+                  size="lg"
+                  onClick={() => router.push('/auth/signin')}
+                  className="bg-gray-900 hover:bg-gray-800 text-white text-lg px-8 py-4 shadow-lg"
+                >
+                  Start Creating Free
+                  <svg
+                    className="w-5 h-5 ml-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
+                  </svg>
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => {
+                    const element = document.getElementById('showcase');
+                    if (element) {
+                      const yOffset = -80;
+                      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                      window.scrollTo({ top: y, behavior: 'smooth' });
+                    }
+                  }}
+                  className="text-gray-700 border-gray-300 hover:border-gray-900 text-lg px-8 py-4"
+                >
+                  View Examples
+                </Button>
+              </div>
+
+              {/* Stats */}
+              <div className="hero-text flex gap-8 pt-8 border-t border-gray-200">
+                <div>
+                  <div className="text-3xl font-bold text-gray-900">10K+</div>
+                  <div className="text-sm text-gray-600 mt-1">Images Generated</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-gray-900">500+</div>
+                  <div className="text-sm text-gray-600 mt-1">Happy Users</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-gray-900">50+</div>
+                  <div className="text-sm text-gray-600 mt-1">Model Poses</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side - Interactive 3D Rubik's Cube */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, delay: 0.3 }}
+              className="relative"
             >
-              See Examples
-            </Button>
+              <div className="relative w-full h-[600px] lg:h-[700px]">
+                <RubiksCube3D />
+
+                {/* Floating hint text */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 2, duration: 1 }}
+                  className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-gray-200"
+                >
+                  <span className="text-sm text-gray-700 font-medium">
+                    🖱️ Drag to rotate • Hover to interact
+                  </span>
+                </motion.div>
+              </div>
+            </motion.div>
           </div>
-
-          <p className="hero-text text-sm text-gray-500 mt-8">
-            100 free credits • No credit card required • Instant access
-          </p>
         </div>
+      </section>
 
-        {/* Scroll Indicator */}
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
+      {/* Scroll Indicator */}
+      <motion.div
+        animate={{ y: [0, 10, 0] }}
+        transition={{ repeat: Infinity, duration: 2 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
         >
           <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
