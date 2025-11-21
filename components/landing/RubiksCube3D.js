@@ -1,52 +1,54 @@
 'use client';
 
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Float, RoundedBox } from '@react-three/drei';
+import { OrbitControls, Float } from '@react-three/drei';
 import { useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 
 // Rubik's cube colors - Real Rubik's cube color scheme
 const COLORS = {
-  front: '#ffffff',  // White
-  back: '#ffff00',   // Yellow
-  top: '#00ff00',    // Green
-  bottom: '#0000ff', // Blue
-  left: '#ff6b00',   // Orange
-  right: '#ff0000',  // Red
+  right: '#ff0000',   // Red (x+)
+  left: '#ff6b00',    // Orange (x-)
+  top: '#00ff00',     // Green (y+)
+  bottom: '#0000ff',  // Blue (y-)
+  front: '#ffffff',   // White (z+)
+  back: '#ffff00',    // Yellow (z-)
 };
 
-function Cubie({ position, colors, layerRef }) {
+function Cubie({ position, faceColors }) {
   const meshRef = useRef();
   const [hovered, setHovered] = useState(false);
 
-  useFrame((state) => {
+  useFrame(() => {
     if (hovered) {
-      meshRef.current.scale.lerp(new THREE.Vector3(1.1, 1.1, 1.1), 0.1);
+      meshRef.current.scale.lerp(new THREE.Vector3(1.05, 1.05, 1.05), 0.15);
     } else {
-      meshRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
+      meshRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.15);
     }
   });
 
+  // Create materials array for each face
+  // Order: right, left, top, bottom, front, back
+  const materials = faceColors.map(color =>
+    new THREE.MeshStandardMaterial({
+      color: color || '#1a1a1a',
+      metalness: 0.2,
+      roughness: 0.3,
+    })
+  );
+
   return (
-    <RoundedBox
+    <mesh
       ref={meshRef}
-      args={[0.95, 0.95, 0.95]}
-      radius={0.05}
-      smoothness={4}
       position={position}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
     >
-      {colors.map((color, index) => (
-        <meshStandardMaterial
-          key={index}
-          attach={`material-${index}`}
-          color={color || '#1f2937'}
-          metalness={0.3}
-          roughness={0.4}
-        />
+      <boxGeometry args={[0.98, 0.98, 0.98]} />
+      {materials.map((material, index) => (
+        <primitive key={index} object={material} attach={`material-${index}`} />
       ))}
-    </RoundedBox>
+    </mesh>
   );
 }
 
@@ -54,7 +56,7 @@ function RubiksCube() {
   const groupRef = useRef();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Layer refs for random rotations
+  // Layer refs for random rotations - now including middle layers
   const topLayerRef = useRef();
   const middleYLayerRef = useRef();
   const bottomLayerRef = useRef();
@@ -72,14 +74,17 @@ function RubiksCube() {
     isRotating: false,
   });
 
-  // Random layer rotation effect
+  // Random layer rotation effect with faster intervals
   useEffect(() => {
     const layers = [
       { ref: topLayerRef, axis: 'y', name: 'top' },
+      { ref: middleYLayerRef, axis: 'y', name: 'middleY' },
       { ref: bottomLayerRef, axis: 'y', name: 'bottom' },
       { ref: leftLayerRef, axis: 'x', name: 'left' },
+      { ref: middleXLayerRef, axis: 'x', name: 'middleX' },
       { ref: rightLayerRef, axis: 'x', name: 'right' },
       { ref: frontLayerRef, axis: 'z', name: 'front' },
+      { ref: middleZLayerRef, axis: 'z', name: 'middleZ' },
       { ref: backLayerRef, axis: 'z', name: 'back' },
     ];
 
@@ -97,11 +102,12 @@ function RubiksCube() {
       }
     };
 
-    const interval = setInterval(rotateRandomLayer, 3000 + Math.random() * 2000);
+    // Faster intervals: 800ms to 1500ms between rotations
+    const interval = setInterval(rotateRandomLayer, 800 + Math.random() * 700);
     return () => clearInterval(interval);
   }, [rotationState.isRotating]);
 
-  useFrame((state) => {
+  useFrame(() => {
     // Smooth rotation based on mouse position
     if (groupRef.current) {
       const targetRotationY = mousePosition.x * Math.PI * 0.3;
@@ -171,24 +177,25 @@ function RubiksCube() {
     });
   };
 
-  // Generate 3x3x3 cube positions
+  // Generate 3x3x3 cube positions with proper face colors
   const cubies = [];
   for (let x = -1; x <= 1; x++) {
     for (let y = -1; y <= 1; y++) {
       for (let z = -1; z <= 1; z++) {
-        // Determine which faces are visible (outer faces only)
-        const colors = [
-          z === 1 ? COLORS.front : null,    // front (white)
-          z === -1 ? COLORS.back : null,    // back (yellow)
-          y === 1 ? COLORS.top : null,      // top (green)
-          y === -1 ? COLORS.bottom : null,  // bottom (blue)
-          x === -1 ? COLORS.left : null,    // left (orange)
-          x === 1 ? COLORS.right : null,    // right (red)
+        // Determine which faces are visible and assign colors
+        // Material order: right(x+), left(x-), top(y+), bottom(y-), front(z+), back(z-)
+        const faceColors = [
+          x === 1 ? COLORS.right : null,    // right face (red)
+          x === -1 ? COLORS.left : null,    // left face (orange)
+          y === 1 ? COLORS.top : null,      // top face (green)
+          y === -1 ? COLORS.bottom : null,  // bottom face (blue)
+          z === 1 ? COLORS.front : null,    // front face (white)
+          z === -1 ? COLORS.back : null,    // back face (yellow)
         ];
 
         cubies.push({
-          position: [x * 1.02, y * 1.02, z * 1.02],
-          colors,
+          position: [x * 1.01, y * 1.01, z * 1.01],
+          faceColors,
           key: `${x}-${y}-${z}`,
           x, y, z,
         });
@@ -209,7 +216,7 @@ function RubiksCube() {
             <Cubie
               key={cubie.key}
               position={cubie.position}
-              colors={cubie.colors}
+              faceColors={cubie.faceColors}
             />
           ))}
         </group>
@@ -220,7 +227,7 @@ function RubiksCube() {
             <Cubie
               key={cubie.key}
               position={cubie.position}
-              colors={cubie.colors}
+              faceColors={cubie.faceColors}
             />
           ))}
         </group>
@@ -231,62 +238,73 @@ function RubiksCube() {
             <Cubie
               key={cubie.key}
               position={cubie.position}
-              colors={cubie.colors}
+              faceColors={cubie.faceColors}
             />
           ))}
         </group>
 
-        {/* Left Layer (x = -1) */}
+        {/* Left Layer (x = -1) - only middle cubies */}
         <group ref={leftLayerRef}>
           {cubies.filter(c => c.x === -1 && c.y !== 1 && c.y !== -1).map((cubie) => (
             <Cubie
               key={`left-${cubie.key}`}
               position={cubie.position}
-              colors={cubie.colors}
+              faceColors={cubie.faceColors}
             />
           ))}
         </group>
 
-        {/* Right Layer (x = 1) */}
+        {/* Middle X Layer (x = 0) */}
+        <group ref={middleXLayerRef}>
+          {cubies.filter(c => c.x === 0 && c.y !== 1 && c.y !== -1).map((cubie) => (
+            <Cubie
+              key={`middleX-${cubie.key}`}
+              position={cubie.position}
+              faceColors={cubie.faceColors}
+            />
+          ))}
+        </group>
+
+        {/* Right Layer (x = 1) - only middle cubies */}
         <group ref={rightLayerRef}>
           {cubies.filter(c => c.x === 1 && c.y !== 1 && c.y !== -1).map((cubie) => (
             <Cubie
               key={`right-${cubie.key}`}
               position={cubie.position}
-              colors={cubie.colors}
+              faceColors={cubie.faceColors}
             />
           ))}
         </group>
 
-        {/* Front Layer (z = 1) */}
+        {/* Front Layer (z = 1) - only center cubie */}
         <group ref={frontLayerRef}>
           {cubies.filter(c => c.z === 1 && c.y !== 1 && c.y !== -1 && c.x !== 1 && c.x !== -1).map((cubie) => (
             <Cubie
               key={`front-${cubie.key}`}
               position={cubie.position}
-              colors={cubie.colors}
+              faceColors={cubie.faceColors}
             />
           ))}
         </group>
 
-        {/* Back Layer (z = -1) */}
+        {/* Middle Z Layer (z = 0) - only center cubie */}
+        <group ref={middleZLayerRef}>
+          {cubies.filter(c => c.z === 0 && c.y !== 1 && c.y !== -1 && c.x !== 1 && c.x !== -1).map((cubie) => (
+            <Cubie
+              key={`middleZ-${cubie.key}`}
+              position={cubie.position}
+              faceColors={cubie.faceColors}
+            />
+          ))}
+        </group>
+
+        {/* Back Layer (z = -1) - only center cubie */}
         <group ref={backLayerRef}>
           {cubies.filter(c => c.z === -1 && c.y !== 1 && c.y !== -1 && c.x !== 1 && c.x !== -1).map((cubie) => (
             <Cubie
               key={`back-${cubie.key}`}
               position={cubie.position}
-              colors={cubie.colors}
-            />
-          ))}
-        </group>
-
-        {/* Center cubie (middle of everything) */}
-        <group ref={middleZLayerRef}>
-          {cubies.filter(c => c.x === 0 && c.y === 0 && c.z === 0).map((cubie) => (
-            <Cubie
-              key={`center-${cubie.key}`}
-              position={cubie.position}
-              colors={cubie.colors}
+              faceColors={cubie.faceColors}
             />
           ))}
         </group>
@@ -302,10 +320,10 @@ export default function RubiksCube3D() {
         camera={{ position: [5, 5, 8], fov: 50 }}
         style={{ background: 'transparent' }}
       >
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[10, 10, 5]} intensity={1.2} />
-        <directionalLight position={[-10, -10, -5]} intensity={0.4} />
-        <pointLight position={[-10, -10, -5]} intensity={0.5} />
+        <ambientLight intensity={0.7} />
+        <directionalLight position={[10, 10, 5]} intensity={1.5} />
+        <directionalLight position={[-10, -10, -5]} intensity={0.5} />
+        <pointLight position={[0, 10, 0]} intensity={0.3} />
         <spotLight
           position={[5, 5, 5]}
           angle={0.3}
