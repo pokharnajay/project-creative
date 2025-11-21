@@ -18,6 +18,19 @@ export default function LandingHeader() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const smoothScrollTo = (elementId) => {
+    const element = document.getElementById(elementId);
+    if (element) {
+      const yOffset = -80; // Header height offset
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+      window.scrollTo({
+        top: y,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <motion.header
       initial={{ y: -100 }}
@@ -46,24 +59,24 @@ export default function LandingHeader() {
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a
-              href="#features"
-              className="text-gray-700 hover:text-indigo-600 transition-colors font-medium"
+            <button
+              onClick={() => smoothScrollTo('features')}
+              className="text-gray-700 hover:text-indigo-600 transition-colors font-medium cursor-pointer"
             >
               Features
-            </a>
-            <a
-              href="#showcase"
-              className="text-gray-700 hover:text-indigo-600 transition-colors font-medium"
+            </button>
+            <button
+              onClick={() => smoothScrollTo('showcase')}
+              className="text-gray-700 hover:text-indigo-600 transition-colors font-medium cursor-pointer"
             >
               Showcase
-            </a>
-            <a
-              href="#models"
-              className="text-gray-700 hover:text-indigo-600 transition-colors font-medium"
+            </button>
+            <button
+              onClick={() => smoothScrollTo('models')}
+              className="text-gray-700 hover:text-indigo-600 transition-colors font-medium cursor-pointer"
             >
               Models
-            </a>
+            </button>
           </nav>
 
           {/* CTA Button */}

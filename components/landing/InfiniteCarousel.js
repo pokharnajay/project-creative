@@ -19,7 +19,7 @@ function CarouselRow({ images, direction = 'left', speed = 20 }) {
 
   useEffect(() => {
     const row = rowRef.current;
-    const totalWidth = row.scrollWidth / 2;
+    const totalWidth = row.scrollWidth / 3; // Divide by 3 since we tripled images
 
     gsap.to(row, {
       x: direction === 'left' ? -totalWidth : totalWidth,
@@ -32,7 +32,8 @@ function CarouselRow({ images, direction = 'left', speed = 20 }) {
     });
   }, [direction, speed]);
 
-  const doubledImages = [...images, ...images];
+  // Triple the images for seamless infinite loop
+  const doubledImages = [...images, ...images, ...images];
 
   return (
     <div className="overflow-hidden py-4">
