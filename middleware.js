@@ -17,9 +17,68 @@ const protectedRoutes = [
 ];
 
 /**
+ * API routes that need origin validation
+ */
+const apiRoutes = ['/api/'];
+
+/**
  * Public routes that should redirect to dashboard if authenticated
  */
 const publicRoutes = ['/auth/signin', '/auth/signup'];
+
+/**
+ * Validate request origin for API routes
+ */
+function validateOrigin(request) {
+  const origin = request.headers.get('origin');
+  const host = request.headers.get('host');
+  const referer = request.headers.get('referer');
+
+  // Get allowed origins
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${host}`;
+  const allowedOrigins = [
+    appUrl,
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+  ];
+
+  // For preflight requests, always check origin
+  if (request.method === 'OPTIONS') {
+    return origin ? allowedOrigins.some(allowed => {
+      try {
+        return new URL(allowed).origin === origin;
+      } catch {
+        return false;
+      }
+    }) : true;
+  }
+
+  // For same-origin requests (no origin header), check referer
+  if (!origin) {
+    if (!referer) return true; // Allow requests without origin/referer (e.g., direct API calls)
+    try {
+      const refererOrigin = new URL(referer).origin;
+      return allowedOrigins.some(allowed => {
+        try {
+          return new URL(allowed).origin === refererOrigin;
+        } catch {
+          return false;
+        }
+      });
+    } catch {
+      return false;
+    }
+  }
+
+  // Validate origin
+  return allowedOrigins.some(allowed => {
+    try {
+      return new URL(allowed).origin === origin;
+    } catch {
+      return false;
+    }
+  });
+}
 
 /**
  * Middleware to handle authentication and security
@@ -29,6 +88,17 @@ export async function middleware(request) {
 
   // Update session and get user
   const { user, response } = await updateSession(request);
+
+  // Check if route is an API route
+  const isApiRoute = apiRoutes.some((route) => pathname.startsWith(route));
+
+  // Validate origin for API routes (prevent CSRF)
+  if (isApiRoute && !validateOrigin(request)) {
+    return NextResponse.json(
+      { error: 'Invalid origin' },
+      { status: 403 }
+    );
+  }
 
   // Check if route is protected
   const isProtectedRoute = protectedRoutes.some((route) =>

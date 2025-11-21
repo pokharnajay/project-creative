@@ -118,6 +118,10 @@ CREATE POLICY "Users can view own profile" ON users
 CREATE POLICY "Users can update own profile" ON users
   FOR UPDATE USING (auth.uid() = id);
 
+-- Allow trigger to create user profiles (runs as SECURITY DEFINER)
+CREATE POLICY "Service can insert users" ON users
+  FOR INSERT WITH CHECK (true);
+
 -- Folders policies
 CREATE POLICY "Users can view own folders" ON folders
   FOR SELECT USING (auth.uid() = user_id);
