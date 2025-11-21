@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/dashboard/Navbar';
 import ImageUploadBox from '@/components/generation/ImageUploadBox';
@@ -11,7 +11,7 @@ import Card, { CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import Loader from '@/components/ui/Loader';
 
 export default function GeneratePage() {
-  const { data: session } = useSession();
+  const { user, isAuthenticated } = useAuth();
   const router = useRouter();
   const [productImage, setProductImage] = useState(null);
   const [modelImage, setModelImage] = useState(null);

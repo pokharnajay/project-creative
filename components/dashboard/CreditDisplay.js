@@ -1,19 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/providers/AuthProvider';
 
 export default function CreditDisplay() {
-  const { data: session } = useSession();
+  const { profile, isAuthenticated } = useAuth();
   const [credits, setCredits] = useState(null);
 
   useEffect(() => {
-    if (session?.user?.credits !== undefined) {
-      setCredits(session.user.credits);
-    } else {
+    if (profile?.credits !== undefined) {
+      setCredits(profile.credits);
+    } else if (isAuthenticated) {
       fetchCredits();
     }
-  }, [session]);
+  }, [profile, isAuthenticated]);
 
   const fetchCredits = async () => {
     try {

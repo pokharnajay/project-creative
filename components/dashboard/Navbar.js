@@ -1,13 +1,18 @@
 'use client';
 
-import { signOut, useSession } from 'next-auth/react';
+import { useAuth } from '@/components/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import CreditDisplay from './CreditDisplay';
 
 export default function Navbar() {
-  const { data: session } = useSession();
+  const { user, profile, signOut } = useAuth();
   const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push('/');
+  };
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
@@ -28,27 +33,33 @@ export default function Navbar() {
               >
                 Dashboard
               </button>
+              <button
+                onClick={() => router.push('/buy-credits')}
+                className="text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                Buy Credits
+              </button>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
             <CreditDisplay />
-            {session?.user && (
+            {user && (
               <div className="flex items-center gap-3">
-                {session.user.image && (
+                {(profile?.image || user.user_metadata?.avatar_url) && (
                   <img
-                    src={session.user.image}
-                    alt={session.user.name || 'User'}
+                    src={profile?.image || user.user_metadata?.avatar_url}
+                    alt={profile?.name || user.user_metadata?.name || 'User'}
                     className="w-8 h-8 rounded-full"
                   />
                 )}
                 <span className="text-sm text-gray-700 hidden md:block">
-                  {session.user.name}
+                  {profile?.name || user.user_metadata?.name || user.email}
                 </span>
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => signOut({ callbackUrl: '/' })}
+                  onClick={handleSignOut}
                 >
                   Sign Out
                 </Button>

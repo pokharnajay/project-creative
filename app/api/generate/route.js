@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { createClient } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { generateImageWithReplicate } from '@/lib/gemini';
 import { deductCredits, getUserCredits, CREDITS_PER_GENERATION } from '@/utils/credits';
@@ -8,9 +8,11 @@ import { nanoid } from 'nanoid';
 
 export async function POST(request) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user from Supabase
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user.id) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -24,7 +26,7 @@ export async function POST(request) {
     }
 
     // Check if user has enough credits
-    const userCredits = await getUserCredits(session.user.id);
+    const userCredits = await getUserCredits(user.id);
     const requiredCredits = CREDITS_PER_GENERATION * numVariations;
 
     if (userCredits < requiredCredits) {
@@ -60,7 +62,7 @@ export async function POST(request) {
         const imageBuffer = await imageResponse.arrayBuffer();
 
         // Upload to GCS
-        const fileName = `generated/${session.user.id}/${nanoid()}.png`;
+        const fileName = `generated/${user.id}/${nanoid()}.png`;
         const url = await uploadToGCS(
           Buffer.from(imageBuffer),
           fileName,
@@ -92,7 +94,7 @@ export async function POST(request) {
       const { data: savedImage, error: dbError } = await supabaseAdmin
         .from('images')
         .insert({
-          user_id: session.user.id,
+          user_id: user.id,
           url: image.url,
           prompt: image.prompt,
           generation_type: generationType,
@@ -110,7 +112,7 @@ export async function POST(request) {
 
       // Deduct credits
       await deductCredits(
-        session.user.id,
+        user.id,
         CREDITS_PER_GENERATION,
         'Image generation',
         savedImage.id

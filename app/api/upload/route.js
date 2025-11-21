@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { createClient } from '@/lib/supabase-server';
 import { uploadToGCS } from '@/lib/google-cloud';
 import { nanoid } from 'nanoid';
 
 export async function POST(request) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user from Supabase
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -42,7 +44,7 @@ export async function POST(request) {
 
     // Generate unique filename
     const fileExtension = file.name.split('.').pop();
-    const fileName = `${session.user.id}/${nanoid()}.${fileExtension}`;
+    const fileName = `${user.id}/${nanoid()}.${fileExtension}`;
 
     // Upload to Google Cloud Storage
     const url = await uploadToGCS(buffer, fileName, file.type);

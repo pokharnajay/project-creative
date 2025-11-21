@@ -1,19 +1,21 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { createClient } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export async function GET(request) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user from Supabase
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user.id) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { data, error } = await supabaseAdmin
       .from('folders')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -32,9 +34,11 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user from Supabase
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user.id) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -50,7 +54,7 @@ export async function POST(request) {
     const { data, error } = await supabaseAdmin
       .from('folders')
       .insert({
-        user_id: session.user.id,
+        user_id: user.id,
         name: name.trim(),
         description: description || '',
       })
@@ -79,9 +83,11 @@ export async function POST(request) {
 
 export async function DELETE(request) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user from Supabase
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user.id) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -100,7 +106,7 @@ export async function DELETE(request) {
       .from('folders')
       .select('*')
       .eq('id', folderId)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (fetchError || !folder) {
@@ -132,9 +138,11 @@ export async function DELETE(request) {
 
 export async function PATCH(request) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user from Supabase
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session || !session.user.id) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -152,7 +160,7 @@ export async function PATCH(request) {
       .from('folders')
       .select('*')
       .eq('id', folderId)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (fetchError || !folder) {
