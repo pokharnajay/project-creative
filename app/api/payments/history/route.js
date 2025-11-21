@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 export async function GET(request) {
   try {
     // Get authenticated user
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

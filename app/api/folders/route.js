@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 export async function GET(request) {
   try {
     // Get authenticated user from Supabase
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -35,7 +35,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     // Get authenticated user from Supabase
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -84,7 +84,7 @@ export async function POST(request) {
 export async function DELETE(request) {
   try {
     // Get authenticated user from Supabase
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -139,7 +139,7 @@ export async function DELETE(request) {
 export async function PATCH(request) {
   try {
     // Get authenticated user from Supabase
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

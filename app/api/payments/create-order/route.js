@@ -21,7 +21,7 @@ export async function POST(request) {
     const userAgent = getUserAgent(request.headers);
 
     // Get authenticated user
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
