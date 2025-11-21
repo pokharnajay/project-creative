@@ -269,20 +269,20 @@ export default function Home() {
 
       {/* Showcase Carousel Section */}
       <section id="showcase" ref={showcaseRef} className="py-24 bg-gray-50 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 mb-16">
+        {/* <div className="max-w-7xl mx-auto px-6 lg:px-8 mb-16">
           <h2 className="section-title text-4xl md:text-5xl font-bold text-center text-gray-900 mb-4">
             Stunning Results, Every Time
           </h2>
           <p className="text-xl text-gray-600 text-center max-w-2xl mx-auto">
-            See what's possible with AI-powered image generation
+            {`See what's possible with AI-powered image generation`}
           </p>
-        </div>
+        </div> */}
 
         <InfiniteCarousel />
       </section>
 
       {/* Model Showcase Section */}
-      <section id="models" ref={modelsRef} className="py-24 bg-white">
+      <section id="models" ref={modelsRef} className="py-24 bg-white h-[100vh]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="section-content">
             <Model3DShowcase />
@@ -291,7 +291,7 @@ export default function Home() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-24 bg-gray-900 relative overflow-hidden">
+      <section className="py-24 bg-gray-50 relative overflow-hidden">
         <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -299,29 +299,30 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               Ready to Transform Your Product Photography?
             </h2>
-            <p className="text-xl text-gray-300 mb-10">
+            <p className="text-xl text-gray-600 mb-10">
               Join thousands of creators and businesses using AI to create stunning visuals
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
                 onClick={() => router.push('/auth/signin')}
-                className="bg-white text-gray-900 hover:bg-gray-100 text-lg px-10 py-4"
+                className="bg-gray-800 text-white hover:bg-gray-950 text-lg px-10 py-4"
               >
                 Start Free Trial
               </Button>
-              <Button
+              {/* <Button
                 variant="outline"
                 size="lg"
                 className="border-2 border-white text-white hover:bg-white hover:text-gray-900 text-lg px-10 py-4"
               >
                 View Pricing
-              </Button>
+              </Button> */}
             </div>
-            <p className="text-gray-400 mt-6">No credit card required • 100 free credits • Cancel anytime</p>
+            {/* <p className="text-gray-400 mt-6">No credit card required • 100 free credits • Cancel anytime</p> */}
+            <p className="text-gray-800 mt-6 font-medium">No credit card required • 100 free credits</p>
           </motion.div>
         </div>
       </section>

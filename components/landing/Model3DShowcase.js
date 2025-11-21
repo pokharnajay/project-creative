@@ -75,7 +75,7 @@ export default function Model3DShowcase() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="relative h-[500px] hidden lg:block"
+          className="relative h-[500px] hidden lg:block mt-[10%]"
         >
           {MODEL_POSES.map((pose, index) => (
             <motion.div

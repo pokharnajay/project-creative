@@ -19,8 +19,8 @@ export default function LandingFooter() {
   };
 
   return (
-    <footer className="bg-gradient-to-b from-gray-50 to-white border-t border-gray-200">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+    <footer className="bg-gray-900 from-gray-50 to-white border-t border-gray-200">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-16 pl-0">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -38,11 +38,11 @@ export default function LandingFooter() {
                 Image Studio
               </span>
             </div>
-            <p className="text-gray-600 mb-6 max-w-md">
+            <p className="text-gray-100 mb-0 max-w-md">
               Transform your product photography with AI. Create stunning professional images in
               seconds with our advanced image generation platform.
             </p>
-            <div className="flex gap-4">
+            {/* <div className="flex gap-4">
               <a
                 href="#"
                 className="w-10 h-10 bg-gray-100 hover:bg-indigo-100 rounded-full flex items-center justify-center transition-colors"
@@ -67,61 +67,7 @@ export default function LandingFooter() {
                   <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z" />
                 </svg>
               </a>
-            </div>
-          </motion.div>
-
-          {/* Product */}
-          <motion.div variants={itemVariants}>
-            <h3 className="font-semibold text-gray-900 mb-4">Product</h3>
-            <ul className="space-y-3">
-              <li>
-                <a href="#" className="text-gray-600 hover:text-indigo-600 transition-colors">
-                  Features
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-600 hover:text-indigo-600 transition-colors">
-                  Pricing
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-600 hover:text-indigo-600 transition-colors">
-                  Showcase
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-600 hover:text-indigo-600 transition-colors">
-                  API
-                </a>
-              </li>
-            </ul>
-          </motion.div>
-
-          {/* Company */}
-          <motion.div variants={itemVariants}>
-            <h3 className="font-semibold text-gray-900 mb-4">Company</h3>
-            <ul className="space-y-3">
-              <li>
-                <a href="#" className="text-gray-600 hover:text-indigo-600 transition-colors">
-                  About
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-600 hover:text-indigo-600 transition-colors">
-                  Blog
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-600 hover:text-indigo-600 transition-colors">
-                  Careers
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-600 hover:text-indigo-600 transition-colors">
-                  Contact
-                </a>
-              </li>
-            </ul>
+            </div> */}
           </motion.div>
         </motion.div>
 
@@ -133,20 +79,9 @@ export default function LandingFooter() {
           viewport={{ once: true }}
           className="mt-12 pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4"
         >
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-600 text-sm text-center mx-auto">
             &copy; 2025 AI Image Studio. All rights reserved.
           </p>
-          <div className="flex gap-6 text-sm">
-            <a href="#" className="text-gray-600 hover:text-indigo-600 transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="text-gray-600 hover:text-indigo-600 transition-colors">
-              Terms of Service
-            </a>
-            <a href="#" className="text-gray-600 hover:text-indigo-600 transition-colors">
-              Cookies
-            </a>
-          </div>
         </motion.div>
       </div>
     </footer>
