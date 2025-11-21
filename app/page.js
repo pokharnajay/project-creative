@@ -122,13 +122,13 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen bg-white overflow-x-clip">
       <LandingHeader />
 
       {/* Hero Section */}
       <section
         ref={heroRef}
-        className="relative min-h-screen flex items-center overflow-hidden bg-gray-50"
+        className="relative min-h-[80vh] flex items-center overflow-hidden bg-gray-50"
       >
         {/* Hero Content - Two Column Layout */}
         <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-32 w-full">
@@ -196,7 +196,7 @@ export default function Home() {
               </div>
 
               {/* Stats */}
-              <div className="hero-text flex gap-8 pt-8 border-t border-gray-200">
+              {/* <div className="hero-text flex gap-8 pt-8 border-t border-gray-200">
                 <div>
                   <div className="text-3xl font-bold text-gray-900">10K+</div>
                   <div className="text-sm text-gray-600 mt-1">Images Generated</div>
@@ -209,7 +209,7 @@ export default function Home() {
                   <div className="text-3xl font-bold text-gray-900">50+</div>
                   <div className="text-sm text-gray-600 mt-1">Model Poses</div>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Right Side - Interactive 3D Rubik's Cube */}
@@ -223,7 +223,7 @@ export default function Home() {
                 <RubiksCube3D />
 
                 {/* Floating hint text */}
-                <motion.div
+                {/* <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 2, duration: 1 }}
@@ -232,7 +232,7 @@ export default function Home() {
                   <span className="text-sm text-gray-700 font-medium">
                     🖱️ Drag to rotate • Hover to interact
                   </span>
-                </motion.div>
+                </motion.div> */}
               </div>
             </motion.div>
           </div>
@@ -323,7 +323,7 @@ export default function Home() {
       </section>
 
       {/* Model Showcase Section */}
-      <section id="models" ref={modelsRef} className="py-24 bg-white h-[100vh]">
+      <section id="models" ref={modelsRef} className="py-24 bg-white ">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="section-content">
             <Model3DShowcase />
