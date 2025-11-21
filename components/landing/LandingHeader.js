@@ -59,12 +59,12 @@ export default function LandingHeader() {
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <button
+            {/* <button
               onClick={() => smoothScrollTo('features')}
               className="text-gray-700 hover:text-gray-900 transition-colors font-medium cursor-pointer"
             >
               Features
-            </button>
+            </button> */}
             <button
               onClick={() => smoothScrollTo('showcase')}
               className="text-gray-700 hover:text-gray-900 transition-colors font-medium cursor-pointer"
@@ -85,7 +85,7 @@ export default function LandingHeader() {
               variant="ghost"
               size="sm"
               onClick={() => router.push('/auth/signin')}
-              className="hidden sm:inline-flex hover:border-[0.1px] hover:border-gray-900 hover:rounded-full"
+              className="hidden sm:inline-flex hover:border-[0.1px] hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-400 ease-in-out"
             >
               Sign In
             </Button>

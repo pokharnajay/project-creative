@@ -6,7 +6,7 @@ import { nanoid } from 'nanoid';
 export async function POST(request) {
   try {
     // Get authenticated user from Supabase
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

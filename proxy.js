@@ -81,9 +81,10 @@ function validateOrigin(request) {
 }
 
 /**
- * Middleware to handle authentication and security
+ * Proxy to handle authentication and security
+ * (Renamed from middleware to proxy for Next.js 16+)
  */
-export async function middleware(request) {
+export async function proxy(request) {
   const { pathname } = request.nextUrl;
 
   // Update session and get user

@@ -219,7 +219,8 @@ export default function Home() {
               transition={{ duration: 1, delay: 0.3 }}
               className="relative"
             >
-              <div className="relative w-full h-[600px] lg:h-[700px]">
+              <div className="relative w-full h-[600px] lg:h-[700px] lg:ml-20">
+              <div className='absolute bg-transparent border-[0.2px] border-black w-[500px] h-[500px] rounded-full -z-1 top-[57%] translate-y-[-50%] lg:ml-10' />
                 <RubiksCube3D />
 
                 {/* Floating hint text */}
@@ -251,7 +252,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" ref={featuresRef} className="flex items-center justify-center min-h-[100vh] bg-white">
+      {/* <section id="features" ref={featuresRef} className="flex items-center justify-center min-h-[100vh] bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -306,10 +307,10 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Showcase Carousel Section */}
-      <section id="showcase" ref={showcaseRef} className="flex item-center justify-center py-5  bg-[rgba(0,0,0,0.13)] overflow-hidden">
+      <section id="showcase" ref={showcaseRef} className="flex item-center justify-center py-5 bg-white overflow-hidden">
         {/* <div className="max-w-7xl mx-auto px-6 lg:px-8 mb-16">
           <h2 className="section-title text-4xl md:text-5xl font-bold text-center text-gray-900 mb-4">
             Stunning Results, Every Time
@@ -323,7 +324,7 @@ export default function Home() {
       </section>
 
       {/* Model Showcase Section */}
-      <section id="models" ref={modelsRef} className="py-24 bg-white ">
+      <section id="models" ref={modelsRef} className="py-24 bg-[rgba(0,0,0,0.13)] ">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="section-content">
             <Model3DShowcase />
@@ -332,7 +333,7 @@ export default function Home() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-24  bg-[rgba(0,0,0,0.13)] relative overflow-hidden">
+      <section className="py-24  bg-white relative overflow-hidden">
         <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

@@ -7,9 +7,9 @@ import * as THREE from 'three';
 
 // Rubik's cube colors - Custom scheme
 const COLORS = {
-  golden: '#4a5565',  // Golden for middle layers
-  black: '#1a1a1a',   // Black for outer layers
-  interior: '#ffffff', // Darker black for interior faces
+  golden: '#101828',  // Golden for middle layers
+  black: '#4a5565',   // Black for outer layers
+  interior: '#4a5565', // Darker black for interior faces
 };
 
 function Cubie({ position, faceColors, cubeState }) {
@@ -336,7 +336,8 @@ function RubiksCube() {
 
 export default function RubiksCube3D() {
   return (
-    <div className="w-full h-full min-h-[600px]">
+    <div className="w-full h-full min-h-[800px] relative">
+    
       <Canvas
         camera={{ position: [6, 6, 9], fov: 45 }}
         style={{ background: 'transparent' }}

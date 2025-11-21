@@ -5,7 +5,7 @@ import { getUserCredits, addCredits, getCreditHistory } from '@/utils/credits';
 export async function GET(request) {
   try {
     // Get authenticated user from Supabase
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -34,7 +34,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     // Get authenticated user from Supabase
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
