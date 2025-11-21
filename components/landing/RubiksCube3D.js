@@ -5,7 +5,7 @@ import { OrbitControls, Float } from '@react-three/drei';
 import { useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 
-// Rubik's cube colors - Real Rubik's cube color scheme
+// Rubik's cube colors
 const COLORS = {
   right: '#ff0000',   // Red (x+)
   left: '#ff6b00',    // Orange (x-)
@@ -27,8 +27,6 @@ function Cubie({ position, faceColors }) {
     }
   });
 
-  // Create materials array for each face
-  // Order: right, left, top, bottom, front, back
   const materials = faceColors.map(color =>
     new THREE.MeshStandardMaterial({
       color: color || '#1a1a1a',
@@ -56,58 +54,58 @@ function RubiksCube() {
   const groupRef = useRef();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Layer refs for random rotations - now including middle layers
-  const topLayerRef = useRef();
-  const middleYLayerRef = useRef();
-  const bottomLayerRef = useRef();
-  const leftLayerRef = useRef();
-  const middleXLayerRef = useRef();
-  const rightLayerRef = useRef();
-  const frontLayerRef = useRef();
-  const middleZLayerRef = useRef();
-  const backLayerRef = useRef();
+  // Layer refs - these will accumulate rotations
+  const layerRefs = {
+    top: useRef(),
+    middleY: useRef(),
+    bottom: useRef(),
+    left: useRef(),
+    middleX: useRef(),
+    right: useRef(),
+    front: useRef(),
+    middleZ: useRef(),
+    back: useRef(),
+  };
 
-  const [rotationState, setRotationState] = useState({
-    currentLayer: null,
+  const [rotationQueue, setRotationQueue] = useState([]);
+  const [isRotating, setIsRotating] = useState(false);
+  const currentRotationRef = useRef({
+    layer: null,
+    startRotation: 0,
     targetRotation: 0,
-    currentRotation: 0,
-    isRotating: false,
+    progress: 0,
   });
 
-  // Random layer rotation effect with faster intervals
+  // Add random rotations to queue
   useEffect(() => {
-    const layers = [
-      { ref: topLayerRef, axis: 'y', name: 'top' },
-      { ref: middleYLayerRef, axis: 'y', name: 'middleY' },
-      { ref: bottomLayerRef, axis: 'y', name: 'bottom' },
-      { ref: leftLayerRef, axis: 'x', name: 'left' },
-      { ref: middleXLayerRef, axis: 'x', name: 'middleX' },
-      { ref: rightLayerRef, axis: 'x', name: 'right' },
-      { ref: frontLayerRef, axis: 'z', name: 'front' },
-      { ref: middleZLayerRef, axis: 'z', name: 'middleZ' },
-      { ref: backLayerRef, axis: 'z', name: 'back' },
-    ];
+    const addRandomRotation = () => {
+      const layers = [
+        { name: 'top', ref: layerRefs.top, axis: 'y' },
+        { name: 'middleY', ref: layerRefs.middleY, axis: 'y' },
+        { name: 'bottom', ref: layerRefs.bottom, axis: 'y' },
+        { name: 'left', ref: layerRefs.left, axis: 'x' },
+        { name: 'middleX', ref: layerRefs.middleX, axis: 'x' },
+        { name: 'right', ref: layerRefs.right, axis: 'x' },
+        { name: 'front', ref: layerRefs.front, axis: 'z' },
+        { name: 'middleZ', ref: layerRefs.middleZ, axis: 'z' },
+        { name: 'back', ref: layerRefs.back, axis: 'z' },
+      ];
 
-    const rotateRandomLayer = () => {
-      if (!rotationState.isRotating) {
-        const randomLayer = layers[Math.floor(Math.random() * layers.length)];
-        const direction = Math.random() > 0.5 ? 1 : -1;
+      const randomLayer = layers[Math.floor(Math.random() * layers.length)];
+      const direction = Math.random() > 0.5 ? 1 : -1;
 
-        setRotationState({
-          currentLayer: randomLayer,
-          targetRotation: direction * Math.PI / 2, // 90 degrees
-          currentRotation: 0,
-          isRotating: true,
-        });
-      }
+      setRotationQueue(prev => [...prev, {
+        layer: randomLayer,
+        direction,
+        amount: Math.PI / 2, // 90 degrees
+      }]);
     };
 
-    // Faster intervals: 800ms to 1500ms between rotations
-    const interval = setInterval(rotateRandomLayer, 800 + Math.random() * 700);
+    const interval = setInterval(addRandomRotation, 1000 + Math.random() * 500);
     return () => clearInterval(interval);
-  }, [rotationState.isRotating]);
+  }, []);
 
-  useFrame(() => {
+  useFrame((state, delta) => {
     // Smooth rotation based on mouse position
     if (groupRef.current) {
       const targetRotationY = mousePosition.x * Math.PI * 0.3;
@@ -125,51 +123,76 @@ function RubiksCube() {
       );
     }
 
-    // Animate layer rotations
-    if (rotationState.isRotating && rotationState.currentLayer?.ref.current) {
-      const speed = 0.08;
-      const newRotation = THREE.MathUtils.lerp(
-        rotationState.currentRotation,
-        rotationState.targetRotation,
-        speed
-      );
+    // Process rotation queue
+    if (!isRotating && rotationQueue.length > 0) {
+      const nextRotation = rotationQueue[0];
+      setRotationQueue(prev => prev.slice(1));
 
-      const axis = rotationState.currentLayer.axis;
-      if (axis === 'x') {
-        rotationState.currentLayer.ref.current.rotation.x = newRotation;
-      } else if (axis === 'y') {
-        rotationState.currentLayer.ref.current.rotation.y = newRotation;
-      } else if (axis === 'z') {
-        rotationState.currentLayer.ref.current.rotation.z = newRotation;
+      if (nextRotation.layer.ref.current) {
+        const currentRot = nextRotation.layer.axis === 'x'
+          ? nextRotation.layer.ref.current.rotation.x
+          : nextRotation.layer.axis === 'y'
+          ? nextRotation.layer.ref.current.rotation.y
+          : nextRotation.layer.ref.current.rotation.z;
+
+        currentRotationRef.current = {
+          layer: nextRotation.layer,
+          startRotation: currentRot,
+          targetRotation: currentRot + (nextRotation.direction * nextRotation.amount),
+          progress: 0,
+        };
+
+        setIsRotating(true);
       }
+    }
 
-      setRotationState(prev => ({
-        ...prev,
-        currentRotation: newRotation,
-      }));
+    // Animate current rotation
+    if (isRotating && currentRotationRef.current.layer) {
+      currentRotationRef.current.progress += delta * 3; // Speed of rotation
 
-      // Check if rotation is complete
-      if (Math.abs(newRotation - rotationState.targetRotation) < 0.01) {
-        // Reset rotation to 0 after completing 90 degrees
+      if (currentRotationRef.current.progress >= 1) {
+        // Complete the rotation
+        const axis = currentRotationRef.current.layer.axis;
+        const finalRotation = currentRotationRef.current.targetRotation;
+
         if (axis === 'x') {
-          rotationState.currentLayer.ref.current.rotation.x = 0;
+          currentRotationRef.current.layer.ref.current.rotation.x = finalRotation;
         } else if (axis === 'y') {
-          rotationState.currentLayer.ref.current.rotation.y = 0;
+          currentRotationRef.current.layer.ref.current.rotation.y = finalRotation;
         } else if (axis === 'z') {
-          rotationState.currentLayer.ref.current.rotation.z = 0;
+          currentRotationRef.current.layer.ref.current.rotation.z = finalRotation;
         }
 
-        setRotationState({
-          currentLayer: null,
+        setIsRotating(false);
+        currentRotationRef.current = {
+          layer: null,
+          startRotation: 0,
           targetRotation: 0,
-          currentRotation: 0,
-          isRotating: false,
-        });
+          progress: 0,
+        };
+      } else {
+        // Interpolate rotation
+        const t = currentRotationRef.current.progress;
+        const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // Ease in-out
+
+        const currentRot = THREE.MathUtils.lerp(
+          currentRotationRef.current.startRotation,
+          currentRotationRef.current.targetRotation,
+          eased
+        );
+
+        const axis = currentRotationRef.current.layer.axis;
+        if (axis === 'x') {
+          currentRotationRef.current.layer.ref.current.rotation.x = currentRot;
+        } else if (axis === 'y') {
+          currentRotationRef.current.layer.ref.current.rotation.y = currentRot;
+        } else if (axis === 'z') {
+          currentRotationRef.current.layer.ref.current.rotation.z = currentRot;
+        }
       }
     }
   });
 
-  // Handle mouse move
   const handlePointerMove = (event) => {
     setMousePosition({
       x: (event.point.x / 5),
@@ -177,20 +200,18 @@ function RubiksCube() {
     });
   };
 
-  // Generate 3x3x3 cube positions with proper face colors
+  // Generate cubies
   const cubies = [];
   for (let x = -1; x <= 1; x++) {
     for (let y = -1; y <= 1; y++) {
       for (let z = -1; z <= 1; z++) {
-        // Determine which faces are visible and assign colors
-        // Material order: right(x+), left(x-), top(y+), bottom(y-), front(z+), back(z-)
         const faceColors = [
-          x === 1 ? COLORS.right : null,    // right face (red)
-          x === -1 ? COLORS.left : null,    // left face (orange)
-          y === 1 ? COLORS.top : null,      // top face (green)
-          y === -1 ? COLORS.bottom : null,  // bottom face (blue)
-          z === 1 ? COLORS.front : null,    // front face (white)
-          z === -1 ? COLORS.back : null,    // back face (yellow)
+          x === 1 ? COLORS.right : null,
+          x === -1 ? COLORS.left : null,
+          y === 1 ? COLORS.top : null,
+          y === -1 ? COLORS.bottom : null,
+          z === 1 ? COLORS.front : null,
+          z === -1 ? COLORS.back : null,
         ];
 
         cubies.push({
@@ -203,6 +224,32 @@ function RubiksCube() {
     }
   }
 
+  // Helper function to assign cubies to layers
+  const getCubiesForLayer = (layerName) => {
+    switch (layerName) {
+      case 'top':
+        return cubies.filter(c => c.y === 1);
+      case 'middleY':
+        return cubies.filter(c => c.y === 0);
+      case 'bottom':
+        return cubies.filter(c => c.y === -1);
+      case 'left':
+        return cubies.filter(c => c.x === -1 && c.y !== 1 && c.y !== -1);
+      case 'middleX':
+        return cubies.filter(c => c.x === 0 && c.y !== 1 && c.y !== -1);
+      case 'right':
+        return cubies.filter(c => c.x === 1 && c.y !== 1 && c.y !== -1);
+      case 'front':
+        return cubies.filter(c => c.z === 1 && c.y !== 1 && c.y !== -1 && c.x !== 1 && c.x !== -1);
+      case 'middleZ':
+        return cubies.filter(c => c.z === 0 && c.y !== 1 && c.y !== -1 && c.x !== 1 && c.x !== -1);
+      case 'back':
+        return cubies.filter(c => c.z === -1 && c.y !== 1 && c.y !== -1 && c.x !== 1 && c.x !== -1);
+      default:
+        return [];
+    }
+  };
+
   return (
     <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
       <group
@@ -210,104 +257,18 @@ function RubiksCube() {
         onPointerMove={handlePointerMove}
         rotation={[0.3, 0.3, 0]}
       >
-        {/* Top Layer (y = 1) */}
-        <group ref={topLayerRef}>
-          {cubies.filter(c => c.y === 1).map((cubie) => (
-            <Cubie
-              key={cubie.key}
-              position={cubie.position}
-              faceColors={cubie.faceColors}
-            />
-          ))}
-        </group>
-
-        {/* Middle Y Layer (y = 0) */}
-        <group ref={middleYLayerRef}>
-          {cubies.filter(c => c.y === 0).map((cubie) => (
-            <Cubie
-              key={cubie.key}
-              position={cubie.position}
-              faceColors={cubie.faceColors}
-            />
-          ))}
-        </group>
-
-        {/* Bottom Layer (y = -1) */}
-        <group ref={bottomLayerRef}>
-          {cubies.filter(c => c.y === -1).map((cubie) => (
-            <Cubie
-              key={cubie.key}
-              position={cubie.position}
-              faceColors={cubie.faceColors}
-            />
-          ))}
-        </group>
-
-        {/* Left Layer (x = -1) - only middle cubies */}
-        <group ref={leftLayerRef}>
-          {cubies.filter(c => c.x === -1 && c.y !== 1 && c.y !== -1).map((cubie) => (
-            <Cubie
-              key={`left-${cubie.key}`}
-              position={cubie.position}
-              faceColors={cubie.faceColors}
-            />
-          ))}
-        </group>
-
-        {/* Middle X Layer (x = 0) */}
-        <group ref={middleXLayerRef}>
-          {cubies.filter(c => c.x === 0 && c.y !== 1 && c.y !== -1).map((cubie) => (
-            <Cubie
-              key={`middleX-${cubie.key}`}
-              position={cubie.position}
-              faceColors={cubie.faceColors}
-            />
-          ))}
-        </group>
-
-        {/* Right Layer (x = 1) - only middle cubies */}
-        <group ref={rightLayerRef}>
-          {cubies.filter(c => c.x === 1 && c.y !== 1 && c.y !== -1).map((cubie) => (
-            <Cubie
-              key={`right-${cubie.key}`}
-              position={cubie.position}
-              faceColors={cubie.faceColors}
-            />
-          ))}
-        </group>
-
-        {/* Front Layer (z = 1) - only center cubie */}
-        <group ref={frontLayerRef}>
-          {cubies.filter(c => c.z === 1 && c.y !== 1 && c.y !== -1 && c.x !== 1 && c.x !== -1).map((cubie) => (
-            <Cubie
-              key={`front-${cubie.key}`}
-              position={cubie.position}
-              faceColors={cubie.faceColors}
-            />
-          ))}
-        </group>
-
-        {/* Middle Z Layer (z = 0) - only center cubie */}
-        <group ref={middleZLayerRef}>
-          {cubies.filter(c => c.z === 0 && c.y !== 1 && c.y !== -1 && c.x !== 1 && c.x !== -1).map((cubie) => (
-            <Cubie
-              key={`middleZ-${cubie.key}`}
-              position={cubie.position}
-              faceColors={cubie.faceColors}
-            />
-          ))}
-        </group>
-
-        {/* Back Layer (z = -1) - only center cubie */}
-        <group ref={backLayerRef}>
-          {cubies.filter(c => c.z === -1 && c.y !== 1 && c.y !== -1 && c.x !== 1 && c.x !== -1).map((cubie) => (
-            <Cubie
-              key={`back-${cubie.key}`}
-              position={cubie.position}
-              faceColors={cubie.faceColors}
-            />
-          ))}
-        </group>
+        {/* Render all layers */}
+        {Object.entries(layerRefs).map(([layerName, ref]) => (
+          <group key={layerName} ref={ref}>
+            {getCubiesForLayer(layerName).map((cubie) => (
+              <Cubie
+                key={cubie.key}
+                position={cubie.position}
+                faceColors={cubie.faceColors}
+              />
+            ))}
+          </group>
+        ))}
       </group>
     </Float>
   );
