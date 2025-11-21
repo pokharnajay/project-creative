@@ -85,7 +85,7 @@ export default function LandingHeader() {
               variant="ghost"
               size="sm"
               onClick={() => router.push('/auth/signin')}
-              className="hidden sm:inline-flex"
+              className="hidden sm:inline-flex hover:border-[0.1px] hover:border-gray-900 hover:rounded-full"
             >
               Sign In
             </Button>

@@ -7,9 +7,9 @@ import * as THREE from 'three';
 
 // Rubik's cube colors - Custom scheme
 const COLORS = {
-  golden: '#FFD700',  // Golden for middle layers
+  golden: '#4a5565',  // Golden for middle layers
   black: '#1a1a1a',   // Black for outer layers
-  interior: '#0a0a0a', // Darker black for interior faces
+  interior: '#ffffff', // Darker black for interior faces
 };
 
 function Cubie({ position, faceColors, cubeState }) {
@@ -63,19 +63,21 @@ function RubiksCube() {
     for (let x = -1; x <= 1; x++) {
       for (let y = -1; y <= 1; y++) {
         for (let z = -1; z <= 1; z++) {
-          // Determine if this cubie is in a middle layer
-          const isMiddleLayer = x === 0 || y === 0 || z === 0;
-          const cubieColor = isMiddleLayer ? COLORS.golden : COLORS.black;
+          // Determine if this cubie is on a middle line (exactly one coordinate is 0)
+          const zeroCount = [x, y, z].filter(coord => coord === 0).length;
+          const isMiddleLine = zeroCount === 1;
+          const cubieColor = isMiddleLine ? COLORS.golden : COLORS.black;
 
           // Define initial face colors based on position
           // Order: right, left, top, bottom, front, back
+          // Both visible outer faces and interior faces follow the same color scheme
           const faceColors = [
-            x === 1 ? cubieColor : COLORS.interior,   // right face
-            x === -1 ? cubieColor : COLORS.interior,  // left face
-            y === 1 ? cubieColor : COLORS.interior,   // top face
-            y === -1 ? cubieColor : COLORS.interior,  // bottom face
-            z === 1 ? cubieColor : COLORS.interior,   // front face
-            z === -1 ? cubieColor : COLORS.interior,  // back face
+            x === 1 ? cubieColor : (x === -1 ? cubieColor : COLORS.black),   // right face
+            x === -1 ? cubieColor : (x === 1 ? cubieColor : COLORS.black),  // left face
+            y === 1 ? cubieColor : (y === -1 ? cubieColor : COLORS.black),   // top face
+            y === -1 ? cubieColor : (y === 1 ? cubieColor : COLORS.black),  // bottom face
+            z === 1 ? cubieColor : (z === -1 ? cubieColor : COLORS.black),   // front face
+            z === -1 ? cubieColor : (z === 1 ? cubieColor : COLORS.black),  // back face
           ];
 
           initialState.push({

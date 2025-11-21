@@ -128,10 +128,10 @@ export default function Home() {
       {/* Hero Section */}
       <section
         ref={heroRef}
-        className="relative min-h-[80vh] flex items-center overflow-hidden bg-gray-50"
+        className="relative min-h-[100vh] flex items-center overflow-hidden bg-[rgba(0,0,0,0.13)]"
       >
         {/* Hero Content - Two Column Layout */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-32 w-full">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-10 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Side - Text Content */}
             <div className="space-y-8">
@@ -144,7 +144,7 @@ export default function Home() {
                 <span className="text-gray-700 font-medium">AI-Powered Image Generation</span>
               </motion.div>
 
-              <h1 className="hero-text text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
+              <h1 className="hero-text text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight text-nowrap">
                 Visualize Beyond
                 <br />
                 <span className="text-gray-600">Reality</span>
@@ -251,7 +251,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" ref={featuresRef} className="py-24 bg-white">
+      <section id="features" ref={featuresRef} className="flex items-center justify-center min-h-[100vh] bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -309,7 +309,7 @@ export default function Home() {
       </section>
 
       {/* Showcase Carousel Section */}
-      <section id="showcase" ref={showcaseRef} className="py-24 bg-gray-50 overflow-hidden">
+      <section id="showcase" ref={showcaseRef} className="flex item-center justify-center py-5  bg-[rgba(0,0,0,0.13)] overflow-hidden">
         {/* <div className="max-w-7xl mx-auto px-6 lg:px-8 mb-16">
           <h2 className="section-title text-4xl md:text-5xl font-bold text-center text-gray-900 mb-4">
             Stunning Results, Every Time
@@ -332,7 +332,7 @@ export default function Home() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-24 bg-gray-50 relative overflow-hidden">
+      <section className="py-24  bg-[rgba(0,0,0,0.13)] relative overflow-hidden">
         <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

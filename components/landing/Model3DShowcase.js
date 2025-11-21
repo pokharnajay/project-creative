@@ -4,11 +4,11 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 const MODEL_POSES = [
-  { id: 1, type: 'Full Length', position: 'top-0 left-0 z-10', rotation: '-rotate-3', size: 'w-48 h-64' },
-  { id: 2, type: 'Waist Length', position: 'top-8 left-32 z-20', rotation: 'rotate-2', size: 'w-44 h-60' },
-  { id: 3, type: 'Close Up', position: 'top-16 left-64 z-30', rotation: '-rotate-1', size: 'w-48 h-64' },
-  { id: 4, type: 'Left Profile', position: 'top-4 left-96 z-20', rotation: 'rotate-3', size: 'w-40 h-56' },
-  { id: 5, type: 'Right Profile', position: 'top-12 left-[28rem] z-10', rotation: '-rotate-2', size: 'w-44 h-60' },
+  { id: 1, type: 'Full Length', position: 'top-0 left-0 z-10', rotation: '-rotate-3', size: 'w-48 h-64', link : 'Model1.jpg' },
+  { id: 2, type: 'Waist Length', position: 'top-8 left-32 z-20', rotation: 'rotate-2', size: 'w-44 h-60', link : 'Model2.jpg' },
+  { id: 3, type: 'Close Up', position: 'top-16 left-64 z-30', rotation: '-rotate-1', size: 'w-48 h-64', link : 'Model3.jpg' },
+  { id: 4, type: 'Left Profile', position: 'top-4 left-96 z-20', rotation: 'rotate-2', size: 'w-40 h-56', link : 'Model4.jpg' },
+  { id: 5, type: 'Right Profile', position: 'top-12 left-[29rem] z-10', rotation: '-rotate-3', size: 'w-44 h-60', link : 'Model5.jpg' },
 ];
 
 export default function Model3DShowcase() {
@@ -83,25 +83,19 @@ export default function Model3DShowcase() {
               initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.15, duration: 0.6 }}
+              transition={{ delay: index * 0.01, duration: 0.6 }}
               whileHover={{ scale: 1.05, rotate: 0, zIndex: 40 }}
               className={`absolute ${pose.position} ${pose.size} ${pose.rotation} cursor-pointer group`}
             >
               <div className="w-full h-full bg-gray-200 rounded-2xl overflow-hidden shadow-xl group-hover:shadow-2xl transition-all duration-300">
                 <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center relative">
                   {/* Placeholder for model image */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200" />
-                  <div className="relative z-10 text-center p-4">
-                    <div className="w-16 h-16 bg-white/50 backdrop-blur-sm rounded-full mx-auto mb-2 flex items-center justify-center">
-                      <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                    <p className="text-xs text-gray-700 font-medium">{pose.type}</p>
-                  </div>
+                  <Image src={`/stock/${pose.link}`} width={0} height={0} className={`${pose.size} object-contain`} alt={`${pose.link}`} />
+                  
+
 
                   {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all" />
+                  
                 </div>
               </div>
             </motion.div>

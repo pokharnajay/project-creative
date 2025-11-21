@@ -73,10 +73,10 @@ function CarouselRow({ images, direction = 'left', speed = 25 }) {
             <div className="w-full  h-full relative transform transition-transform duration-300 group-hover:scale-105">
               <Image
                 src={image.src}
-                alt={image.alt}
-                width={320}
-                className=""
-                height={320}
+                alt={image.alt}               
+                width={0}
+                height={0} 
+                className="object-cover h-full w-full"
                 sizes="320px"
                 onError={(e) => {
                   // Fallback to gradient if image not found
