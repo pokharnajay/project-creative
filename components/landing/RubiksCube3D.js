@@ -5,15 +5,11 @@ import { OrbitControls, Float, RoundedBox } from '@react-three/drei';
 import { useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 
-// Rubik's cube colors
+// Rubik's cube colors - Custom scheme
 const COLORS = {
-  right: '',   // Red (x+)
-  left: '',    // Orange (x-)
-  top: '',     // Green (y+)
-  bottom: '',  // Blue (y-)
-  front: '',   // White (z+)
-  back: '',    // Yellow (z-)
-  black: '',   // Black for hidden faces
+  golden: '#FFD700',  // Golden for middle layers
+  black: '#1a1a1a',   // Black for outer layers
+  interior: '#0a0a0a', // Darker black for interior faces
 };
 
 function Cubie({ position, faceColors, cubeState }) {
@@ -67,15 +63,19 @@ function RubiksCube() {
     for (let x = -1; x <= 1; x++) {
       for (let y = -1; y <= 1; y++) {
         for (let z = -1; z <= 1; z++) {
+          // Determine if this cubie is in a middle layer
+          const isMiddleLayer = x === 0 || y === 0 || z === 0;
+          const cubieColor = isMiddleLayer ? COLORS.golden : COLORS.black;
+
           // Define initial face colors based on position
           // Order: right, left, top, bottom, front, back
           const faceColors = [
-            x === 1 ? COLORS.right : COLORS.black,
-            x === -1 ? COLORS.left : COLORS.black,
-            y === 1 ? COLORS.top : COLORS.black,
-            y === -1 ? COLORS.bottom : COLORS.black,
-            z === 1 ? COLORS.front : COLORS.black,
-            z === -1 ? COLORS.back : COLORS.black,
+            x === 1 ? cubieColor : COLORS.interior,   // right face
+            x === -1 ? cubieColor : COLORS.interior,  // left face
+            y === 1 ? cubieColor : COLORS.interior,   // top face
+            y === -1 ? cubieColor : COLORS.interior,  // bottom face
+            z === 1 ? cubieColor : COLORS.interior,   // front face
+            z === -1 ? cubieColor : COLORS.interior,  // back face
           ];
 
           initialState.push({
