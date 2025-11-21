@@ -68,14 +68,15 @@ function CarouselRow({ images, direction = 'left', speed = 25 }) {
         {repeatedImages.map((image, index) => (
           <div
             key={`${image.id}-${index}`}
-            className="flex-shrink-0 w-80 h-64 rounded-xl overflow-hidden group cursor-pointer bg-gray-100"
+            className="flex-shrink-0 w-80 h-64 rounded-xl  shadow-sm shadow-black overflow-hidden group cursor-pointer bg-gray-100"
           >
-            <div className="w-full h-full relative transform transition-transform duration-300 group-hover:scale-105">
+            <div className="w-full  h-full relative transform transition-transform duration-300 group-hover:scale-105">
               <Image
                 src={image.src}
                 alt={image.alt}
-                fill
-                className="object-cover"
+                width={320}
+                className=""
+                height={320}
                 sizes="320px"
                 onError={(e) => {
                   // Fallback to gradient if image not found
@@ -83,7 +84,7 @@ function CarouselRow({ images, direction = 'left', speed = 25 }) {
                   e.target.parentElement.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
                 }}
               />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all flex items-center justify-center">
+              <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-10 transition-all flex items-center justify-center">
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center">
                     <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
