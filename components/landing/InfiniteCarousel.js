@@ -4,10 +4,10 @@ import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import Image from 'next/image';
 
-// Generate array of 30 stock images (user will add these to public/stock/)
+// Generate array of 30 stock images
 const STOCK_IMAGES = Array.from({ length: 30 }, (_, i) => ({
   id: i + 1,
-  src: `/stock/1.jpg`,
+  src: `/stock/${i + 1}.jpg`,
   alt: `Product ${i + 1}`,
 }));
 
@@ -27,19 +27,28 @@ function CarouselRow({ images, direction = 'left', speed = 25 }) {
     const cardWidth = 320; // w-80 = 320px
     const totalWidth = (cardWidth + gap) * images.length;
 
-    // Start animation
+    // Set initial position for right direction to enable seamless loop
+    if (direction === 'right') {
+      gsap.set(row, { x: -totalWidth });
+    }
+
+    // Start animation with proper infinite loop
     animationRef.current = gsap.to(row, {
-      x: direction === 'left' ? -totalWidth : totalWidth,
+      x: direction === 'left' ? -totalWidth : 0,
       duration: speed,
       ease: 'none',
       repeat: -1,
       modifiers: {
-        x: (x) => {
+        x: gsap.utils.unitize((x) => {
           const numX = parseFloat(x);
-          return `${direction === 'left'
-            ? numX % totalWidth
-            : ((numX % totalWidth) + totalWidth) % totalWidth}px`;
-        },
+          if (direction === 'left') {
+            // Moving left: wrap from -totalWidth to 0
+            return ((numX % totalWidth) + totalWidth) % totalWidth - totalWidth;
+          } else {
+            // Moving right: wrap from -totalWidth to 0
+            return ((numX % totalWidth) - totalWidth) % totalWidth;
+          }
+        }),
       },
     });
 
