@@ -7,7 +7,7 @@ import Image from 'next/image';
 // Generate array of 30 stock images (user will add these to public/stock/)
 const STOCK_IMAGES = Array.from({ length: 30 }, (_, i) => ({
   id: i + 1,
-  src: `/stock/product-${i + 1}.jpg`,
+  src: `/stock/1.jpg`,
   alt: `Product ${i + 1}`,
 }));
 
