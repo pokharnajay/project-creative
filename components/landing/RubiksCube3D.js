@@ -7,13 +7,13 @@ import * as THREE from 'three';
 
 // Rubik's cube colors
 const COLORS = {
-  right: '#ff0000',   // Red (x+)
-  left: '#ff6b00',    // Orange (x-)
-  top: '#00ff00',     // Green (y+)
-  bottom: '#0000ff',  // Blue (y-)
-  front: '#ffffff',   // White (z+)
-  back: '#ffff00',    // Yellow (z-)
-  black: '#000000',   // Black for hidden faces
+  right: '',   // Red (x+)
+  left: '',    // Orange (x-)
+  top: '',     // Green (y+)
+  bottom: '',  // Blue (y-)
+  front: '',   // White (z+)
+  back: '',    // Yellow (z-)
+  black: '',   // Black for hidden faces
 };
 
 function Cubie({ position, faceColors, cubeState }) {
@@ -311,7 +311,7 @@ function RubiksCube() {
   };
 
   return (
-    <Float speed={1.5} rotationIntensity={0.15} floatIntensity={0.4}>
+    <Float speed={1.5} rotationIntensity={0.7} floatIntensity={0.4}>
       <group
         ref={groupRef}
         onPointerMove={handlePointerMove}
@@ -367,7 +367,7 @@ export default function RubiksCube3D() {
           minPolarAngle={Math.PI / 4}
           maxPolarAngle={Math.PI / 1.8}
           autoRotate
-          autoRotateSpeed={0.4}
+          autoRotateSpeed={0.9}
         />
       </Canvas>
     </div>
