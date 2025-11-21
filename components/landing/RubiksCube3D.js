@@ -1,7 +1,7 @@
 'use client';
 
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Float } from '@react-three/drei';
+import { OrbitControls, Float, RoundedBox } from '@react-three/drei';
 import { useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 
@@ -13,40 +13,47 @@ const COLORS = {
   bottom: '#0000ff',  // Blue (y-)
   front: '#ffffff',   // White (z+)
   back: '#ffff00',    // Yellow (z-)
+  black: '#000000',   // Black for hidden faces
 };
 
-function Cubie({ position, faceColors }) {
+function Cubie({ position, faceColors, cubeState }) {
   const meshRef = useRef();
   const [hovered, setHovered] = useState(false);
 
   useFrame(() => {
-    if (hovered) {
-      meshRef.current.scale.lerp(new THREE.Vector3(1.05, 1.05, 1.05), 0.15);
-    } else {
+    if (hovered && meshRef.current) {
+      meshRef.current.scale.lerp(new THREE.Vector3(1.03, 1.03, 1.03), 0.15);
+    } else if (meshRef.current) {
       meshRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.15);
     }
   });
 
-  const materials = faceColors.map(color =>
-    new THREE.MeshStandardMaterial({
-      color: color || '#1a1a1a',
-      metalness: 0.2,
-      roughness: 0.3,
-    })
-  );
+  // Create materials for each face with proper shine
+  const materials = faceColors.map(color => {
+    const mat = new THREE.MeshStandardMaterial({
+      color: color,
+      metalness: 0.1,
+      roughness: 0.2,
+      envMapIntensity: 0.5,
+    });
+    return mat;
+  });
 
   return (
-    <mesh
+    <RoundedBox
       ref={meshRef}
+      args={[0.92, 0.92, 0.92]}
+      radius={0.08}
+      smoothness={8}
       position={position}
+      rotation={cubeState.rotation}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
     >
-      <boxGeometry args={[0.98, 0.98, 0.98]} />
       {materials.map((material, index) => (
         <primitive key={index} object={material} attach={`material-${index}`} />
       ))}
-    </mesh>
+    </RoundedBox>
   );
 }
 
@@ -54,56 +61,97 @@ function RubiksCube() {
   const groupRef = useRef();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Layer refs - these will accumulate rotations
-  const layerRefs = {
-    top: useRef(),
-    middleY: useRef(),
-    bottom: useRef(),
-    left: useRef(),
-    middleX: useRef(),
-    right: useRef(),
-    front: useRef(),
-    middleZ: useRef(),
-    back: useRef(),
-  };
+  // Initialize cube state - each cubie has position, rotation, and face colors
+  const [cubeState, setCubeState] = useState(() => {
+    const initialState = [];
+    for (let x = -1; x <= 1; x++) {
+      for (let y = -1; y <= 1; y++) {
+        for (let z = -1; z <= 1; z++) {
+          // Define initial face colors based on position
+          // Order: right, left, top, bottom, front, back
+          const faceColors = [
+            x === 1 ? COLORS.right : COLORS.black,
+            x === -1 ? COLORS.left : COLORS.black,
+            y === 1 ? COLORS.top : COLORS.black,
+            y === -1 ? COLORS.bottom : COLORS.black,
+            z === 1 ? COLORS.front : COLORS.black,
+            z === -1 ? COLORS.back : COLORS.black,
+          ];
 
-  const [rotationQueue, setRotationQueue] = useState([]);
-  const [isRotating, setIsRotating] = useState(false);
-  const currentRotationRef = useRef({
-    layer: null,
-    startRotation: 0,
-    targetRotation: 0,
-    progress: 0,
+          initialState.push({
+            id: `${x}-${y}-${z}`,
+            position: [x * 1.05, y * 1.05, z * 1.05],
+            gridPosition: { x, y, z },
+            rotation: [0, 0, 0],
+            faceColors: faceColors,
+          });
+        }
+      }
+    }
+    return initialState;
   });
+
+  const [rotationState, setRotationState] = useState({
+    isRotating: false,
+    layer: null,
+    axis: null,
+    direction: 1,
+    progress: 0,
+    affectedCubies: [],
+  });
+
+  // Queue for upcoming rotations
+  const [rotationQueue, setRotationQueue] = useState([]);
 
   // Add random rotations to queue
   useEffect(() => {
     const addRandomRotation = () => {
       const layers = [
-        { name: 'top', ref: layerRefs.top, axis: 'y' },
-        { name: 'middleY', ref: layerRefs.middleY, axis: 'y' },
-        { name: 'bottom', ref: layerRefs.bottom, axis: 'y' },
-        { name: 'left', ref: layerRefs.left, axis: 'x' },
-        { name: 'middleX', ref: layerRefs.middleX, axis: 'x' },
-        { name: 'right', ref: layerRefs.right, axis: 'x' },
-        { name: 'front', ref: layerRefs.front, axis: 'z' },
-        { name: 'middleZ', ref: layerRefs.middleZ, axis: 'z' },
-        { name: 'back', ref: layerRefs.back, axis: 'z' },
+        { axis: 'y', value: 1, name: 'top' },
+        { axis: 'y', value: 0, name: 'middleY' },
+        { axis: 'y', value: -1, name: 'bottom' },
+        { axis: 'x', value: 1, name: 'right' },
+        { axis: 'x', value: 0, name: 'middleX' },
+        { axis: 'x', value: -1, name: 'left' },
+        { axis: 'z', value: 1, name: 'front' },
+        { axis: 'z', value: 0, name: 'middleZ' },
+        { axis: 'z', value: -1, name: 'back' },
       ];
 
       const randomLayer = layers[Math.floor(Math.random() * layers.length)];
       const direction = Math.random() > 0.5 ? 1 : -1;
 
-      setRotationQueue(prev => [...prev, {
-        layer: randomLayer,
-        direction,
-        amount: Math.PI / 2, // 90 degrees
-      }]);
+      setRotationQueue(prev => [...prev, { ...randomLayer, direction }]);
     };
 
-    const interval = setInterval(addRandomRotation, 1000 + Math.random() * 500);
+    const interval = setInterval(addRandomRotation, 1200 + Math.random() * 600);
     return () => clearInterval(interval);
   }, []);
+
+  // Process rotation queue
+  useEffect(() => {
+    if (!rotationState.isRotating && rotationQueue.length > 0) {
+      const nextRotation = rotationQueue[0];
+      setRotationQueue(prev => prev.slice(1));
+
+      // Find affected cubies
+      const affected = cubeState
+        .map((cubie, index) => {
+          const matches = cubie.gridPosition[nextRotation.axis] === nextRotation.value;
+          return matches ? index : -1;
+        })
+        .filter(index => index !== -1);
+
+      setRotationState({
+        isRotating: true,
+        layer: nextRotation.value,
+        axis: nextRotation.axis,
+        direction: nextRotation.direction,
+        progress: 0,
+        affectedCubies: affected,
+      });
+    }
+  }, [rotationQueue, rotationState.isRotating, cubeState]);
 
   useFrame((state, delta) => {
     // Smooth rotation based on mouse position
@@ -123,72 +171,118 @@ function RubiksCube() {
       );
     }
 
-    // Process rotation queue
-    if (!isRotating && rotationQueue.length > 0) {
-      const nextRotation = rotationQueue[0];
-      setRotationQueue(prev => prev.slice(1));
+    // Animate layer rotation
+    if (rotationState.isRotating) {
+      const newProgress = Math.min(rotationState.progress + delta * 2.5, 1);
 
-      if (nextRotation.layer.ref.current) {
-        const currentRot = nextRotation.layer.axis === 'x'
-          ? nextRotation.layer.ref.current.rotation.x
-          : nextRotation.layer.axis === 'y'
-          ? nextRotation.layer.ref.current.rotation.y
-          : nextRotation.layer.ref.current.rotation.z;
+      setRotationState(prev => ({
+        ...prev,
+        progress: newProgress,
+      }));
 
-        currentRotationRef.current = {
-          layer: nextRotation.layer,
-          startRotation: currentRot,
-          targetRotation: currentRot + (nextRotation.direction * nextRotation.amount),
-          progress: 0,
-        };
+      if (newProgress >= 1) {
+        // Rotation complete - update cube state permanently
+        const angle = rotationState.direction * (Math.PI / 2);
 
-        setIsRotating(true);
-      }
-    }
+        setCubeState(prevState => {
+          const newState = [...prevState];
 
-    // Animate current rotation
-    if (isRotating && currentRotationRef.current.layer) {
-      currentRotationRef.current.progress += delta * 3; // Speed of rotation
+          rotationState.affectedCubies.forEach(index => {
+            const cubie = newState[index];
+            const { axis, direction } = rotationState;
 
-      if (currentRotationRef.current.progress >= 1) {
-        // Complete the rotation
-        const axis = currentRotationRef.current.layer.axis;
-        const finalRotation = currentRotationRef.current.targetRotation;
+            // Update grid position
+            const oldPos = cubie.gridPosition;
+            let newGridPos = { ...oldPos };
 
-        if (axis === 'x') {
-          currentRotationRef.current.layer.ref.current.rotation.x = finalRotation;
-        } else if (axis === 'y') {
-          currentRotationRef.current.layer.ref.current.rotation.y = finalRotation;
-        } else if (axis === 'z') {
-          currentRotationRef.current.layer.ref.current.rotation.z = finalRotation;
-        }
+            if (axis === 'x') {
+              const newY = -direction * oldPos.z;
+              const newZ = direction * oldPos.y;
+              newGridPos.y = newY;
+              newGridPos.z = newZ;
+            } else if (axis === 'y') {
+              const newX = direction * oldPos.z;
+              const newZ = -direction * oldPos.x;
+              newGridPos.x = newX;
+              newGridPos.z = newZ;
+            } else if (axis === 'z') {
+              const newX = -direction * oldPos.y;
+              const newY = direction * oldPos.x;
+              newGridPos.x = newX;
+              newGridPos.y = newY;
+            }
 
-        setIsRotating(false);
-        currentRotationRef.current = {
+            // Update world position
+            newState[index].position = [
+              newGridPos.x * 1.05,
+              newGridPos.y * 1.05,
+              newGridPos.z * 1.05,
+            ];
+            newState[index].gridPosition = newGridPos;
+
+            // Rotate face colors
+            const oldColors = [...cubie.faceColors];
+            let newColors = [...oldColors];
+
+            if (axis === 'x') {
+              if (direction === 1) {
+                // Clockwise around X: top->front, front->bottom, bottom->back, back->top
+                newColors[2] = oldColors[4]; // top = front
+                newColors[4] = oldColors[3]; // front = bottom
+                newColors[3] = oldColors[5]; // bottom = back
+                newColors[5] = oldColors[2]; // back = top
+              } else {
+                // Counter-clockwise around X
+                newColors[2] = oldColors[5]; // top = back
+                newColors[5] = oldColors[3]; // back = bottom
+                newColors[3] = oldColors[4]; // bottom = front
+                newColors[4] = oldColors[2]; // front = top
+              }
+            } else if (axis === 'y') {
+              if (direction === 1) {
+                // Clockwise around Y: front->right, right->back, back->left, left->front
+                newColors[4] = oldColors[1]; // front = left
+                newColors[0] = oldColors[4]; // right = front
+                newColors[5] = oldColors[0]; // back = right
+                newColors[1] = oldColors[5]; // left = back
+              } else {
+                // Counter-clockwise around Y
+                newColors[4] = oldColors[0]; // front = right
+                newColors[1] = oldColors[4]; // left = front
+                newColors[5] = oldColors[1]; // back = left
+                newColors[0] = oldColors[5]; // right = back
+              }
+            } else if (axis === 'z') {
+              if (direction === 1) {
+                // Clockwise around Z: top->left, left->bottom, bottom->right, right->top
+                newColors[2] = oldColors[0]; // top = right
+                newColors[1] = oldColors[2]; // left = top
+                newColors[3] = oldColors[1]; // bottom = left
+                newColors[0] = oldColors[3]; // right = bottom
+              } else {
+                // Counter-clockwise around Z
+                newColors[2] = oldColors[1]; // top = left
+                newColors[0] = oldColors[2]; // right = top
+                newColors[3] = oldColors[0]; // bottom = right
+                newColors[1] = oldColors[3]; // left = bottom
+              }
+            }
+
+            newState[index].faceColors = newColors;
+            newState[index].rotation = [0, 0, 0]; // Reset rotation
+          });
+
+          return newState;
+        });
+
+        setRotationState({
+          isRotating: false,
           layer: null,
-          startRotation: 0,
-          targetRotation: 0,
+          axis: null,
+          direction: 1,
           progress: 0,
-        };
-      } else {
-        // Interpolate rotation
-        const t = currentRotationRef.current.progress;
-        const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // Ease in-out
-
-        const currentRot = THREE.MathUtils.lerp(
-          currentRotationRef.current.startRotation,
-          currentRotationRef.current.targetRotation,
-          eased
-        );
-
-        const axis = currentRotationRef.current.layer.axis;
-        if (axis === 'x') {
-          currentRotationRef.current.layer.ref.current.rotation.x = currentRot;
-        } else if (axis === 'y') {
-          currentRotationRef.current.layer.ref.current.rotation.y = currentRot;
-        } else if (axis === 'z') {
-          currentRotationRef.current.layer.ref.current.rotation.z = currentRot;
-        }
+          affectedCubies: [],
+        });
       }
     }
   });
@@ -200,74 +294,38 @@ function RubiksCube() {
     });
   };
 
-  // Generate cubies
-  const cubies = [];
-  for (let x = -1; x <= 1; x++) {
-    for (let y = -1; y <= 1; y++) {
-      for (let z = -1; z <= 1; z++) {
-        const faceColors = [
-          x === 1 ? COLORS.right : null,
-          x === -1 ? COLORS.left : null,
-          y === 1 ? COLORS.top : null,
-          y === -1 ? COLORS.bottom : null,
-          z === 1 ? COLORS.front : null,
-          z === -1 ? COLORS.back : null,
-        ];
+  // Calculate rotation for cubies currently being rotated
+  const getCubieRotation = (index) => {
+    if (rotationState.isRotating && rotationState.affectedCubies.includes(index)) {
+      const angle = rotationState.direction * (Math.PI / 2) * rotationState.progress;
+      const eased = rotationState.progress < 0.5
+        ? 2 * rotationState.progress * rotationState.progress
+        : -1 + (4 - 2 * rotationState.progress) * rotationState.progress;
+      const easedAngle = rotationState.direction * (Math.PI / 2) * eased;
 
-        cubies.push({
-          position: [x * 1.01, y * 1.01, z * 1.01],
-          faceColors,
-          key: `${x}-${y}-${z}`,
-          x, y, z,
-        });
-      }
+      if (rotationState.axis === 'x') return [easedAngle, 0, 0];
+      if (rotationState.axis === 'y') return [0, easedAngle, 0];
+      if (rotationState.axis === 'z') return [0, 0, easedAngle];
     }
-  }
-
-  // Helper function to assign cubies to layers
-  const getCubiesForLayer = (layerName) => {
-    switch (layerName) {
-      case 'top':
-        return cubies.filter(c => c.y === 1);
-      case 'middleY':
-        return cubies.filter(c => c.y === 0);
-      case 'bottom':
-        return cubies.filter(c => c.y === -1);
-      case 'left':
-        return cubies.filter(c => c.x === -1 && c.y !== 1 && c.y !== -1);
-      case 'middleX':
-        return cubies.filter(c => c.x === 0 && c.y !== 1 && c.y !== -1);
-      case 'right':
-        return cubies.filter(c => c.x === 1 && c.y !== 1 && c.y !== -1);
-      case 'front':
-        return cubies.filter(c => c.z === 1 && c.y !== 1 && c.y !== -1 && c.x !== 1 && c.x !== -1);
-      case 'middleZ':
-        return cubies.filter(c => c.z === 0 && c.y !== 1 && c.y !== -1 && c.x !== 1 && c.x !== -1);
-      case 'back':
-        return cubies.filter(c => c.z === -1 && c.y !== 1 && c.y !== -1 && c.x !== 1 && c.x !== -1);
-      default:
-        return [];
-    }
+    return [0, 0, 0];
   };
 
   return (
-    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
+    <Float speed={1.5} rotationIntensity={0.15} floatIntensity={0.4}>
       <group
         ref={groupRef}
         onPointerMove={handlePointerMove}
         rotation={[0.3, 0.3, 0]}
       >
-        {/* Render all layers */}
-        {Object.entries(layerRefs).map(([layerName, ref]) => (
-          <group key={layerName} ref={ref}>
-            {getCubiesForLayer(layerName).map((cubie) => (
-              <Cubie
-                key={cubie.key}
-                position={cubie.position}
-                faceColors={cubie.faceColors}
-              />
-            ))}
-          </group>
+        {cubeState.map((cubie, index) => (
+          <Cubie
+            key={cubie.id}
+            position={cubie.position}
+            faceColors={cubie.faceColors}
+            cubeState={{
+              rotation: getCubieRotation(index),
+            }}
+          />
         ))}
       </group>
     </Float>
@@ -278,15 +336,23 @@ export default function RubiksCube3D() {
   return (
     <div className="w-full h-full min-h-[600px]">
       <Canvas
-        camera={{ position: [5, 5, 8], fov: 50 }}
+        camera={{ position: [6, 6, 9], fov: 45 }}
         style={{ background: 'transparent' }}
+        shadows
       >
-        <ambientLight intensity={0.7} />
-        <directionalLight position={[10, 10, 5]} intensity={1.5} />
-        <directionalLight position={[-10, -10, -5]} intensity={0.5} />
+        {/* Enhanced lighting for realism */}
+        <ambientLight intensity={0.4} />
+        <directionalLight
+          position={[10, 10, 8]}
+          intensity={1.2}
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+        />
+        <directionalLight position={[-8, 5, -5]} intensity={0.3} />
         <pointLight position={[0, 10, 0]} intensity={0.3} />
         <spotLight
-          position={[5, 5, 5]}
+          position={[8, 8, 8]}
           angle={0.3}
           penumbra={1}
           intensity={0.5}
@@ -298,10 +364,10 @@ export default function RubiksCube3D() {
         <OrbitControls
           enableZoom={false}
           enablePan={false}
-          minPolarAngle={Math.PI / 3}
-          maxPolarAngle={Math.PI / 1.5}
+          minPolarAngle={Math.PI / 4}
+          maxPolarAngle={Math.PI / 1.8}
           autoRotate
-          autoRotateSpeed={0.5}
+          autoRotateSpeed={0.4}
         />
       </Canvas>
     </div>
