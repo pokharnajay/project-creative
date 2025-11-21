@@ -49,10 +49,10 @@ export default function LandingHeader() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-xl">AI</span>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-xl font-bold text-gray-900">
               Image Studio
             </span>
           </motion.div>
@@ -61,19 +61,19 @@ export default function LandingHeader() {
           <nav className="hidden md:flex items-center gap-8">
             <button
               onClick={() => smoothScrollTo('features')}
-              className="text-gray-700 hover:text-indigo-600 transition-colors font-medium cursor-pointer"
+              className="text-gray-700 hover:text-gray-900 transition-colors font-medium cursor-pointer"
             >
               Features
             </button>
             <button
               onClick={() => smoothScrollTo('showcase')}
-              className="text-gray-700 hover:text-indigo-600 transition-colors font-medium cursor-pointer"
+              className="text-gray-700 hover:text-gray-900 transition-colors font-medium cursor-pointer"
             >
               Showcase
             </button>
             <button
               onClick={() => smoothScrollTo('models')}
-              className="text-gray-700 hover:text-indigo-600 transition-colors font-medium cursor-pointer"
+              className="text-gray-700 hover:text-gray-900 transition-colors font-medium cursor-pointer"
             >
               Models
             </button>
@@ -92,7 +92,7 @@ export default function LandingHeader() {
             <Button
               size="sm"
               onClick={() => router.push('/auth/signin')}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+              className="bg-gray-900 hover:bg-gray-800 text-white"
             >
               Get Started
             </Button>

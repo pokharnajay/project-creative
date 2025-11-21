@@ -19,7 +19,7 @@ function AnimatedSphere() {
     <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
       <Sphere ref={meshRef} args={[1, 100, 200]} scale={2.2}>
         <MeshDistortMaterial
-          color="#4f46e5"
+          color="#6b7280"
           attach="material"
           distort={0.3}
           speed={1.5}
@@ -59,7 +59,7 @@ function ParticleField() {
           itemSize={3}
         />
       </bufferGeometry>
-      <pointsMaterial size={0.05} color="#8b5cf6" transparent opacity={0.6} />
+      <pointsMaterial size={0.05} color="#9ca3af" transparent opacity={0.6} />
     </points>
   );
 }
@@ -70,7 +70,7 @@ export default function Hero3D() {
       <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
-        <pointLight position={[-10, -10, -5]} intensity={0.5} color="#8b5cf6" />
+        <pointLight position={[-10, -10, -5]} intensity={0.5} color="#ffffff" />
         <AnimatedSphere />
         <ParticleField />
       </Canvas>

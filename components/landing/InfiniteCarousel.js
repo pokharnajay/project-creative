@@ -2,68 +2,86 @@
 
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
+import Image from 'next/image';
 
-const SAMPLE_IMAGES = [
-  { id: 1, color: 'from-purple-400 to-pink-500', title: 'Fashion Lookbook' },
-  { id: 2, color: 'from-blue-400 to-cyan-500', title: 'Product Showcase' },
-  { id: 3, color: 'from-green-400 to-emerald-500', title: 'Brand Campaign' },
-  { id: 4, color: 'from-orange-400 to-red-500', title: 'Studio Shoot' },
-  { id: 5, color: 'from-indigo-400 to-purple-500', title: 'Editorial Style' },
-  { id: 6, color: 'from-pink-400 to-rose-500', title: 'Lifestyle Shot' },
-  { id: 7, color: 'from-teal-400 to-blue-500', title: 'Commercial Ad' },
-  { id: 8, color: 'from-yellow-400 to-orange-500', title: 'Creative Concept' },
-];
+// Generate array of 30 stock images (user will add these to public/stock/)
+const STOCK_IMAGES = Array.from({ length: 30 }, (_, i) => ({
+  id: i + 1,
+  src: `/stock/product-${i + 1}.jpg`,
+  alt: `Product ${i + 1}`,
+}));
 
-function CarouselRow({ images, direction = 'left', speed = 20 }) {
+function CarouselRow({ images, direction = 'left', speed = 25 }) {
   const rowRef = useRef();
+  const animationRef = useRef();
 
   useEffect(() => {
     const row = rowRef.current;
-    const totalWidth = row.scrollWidth / 3; // Divide by 3 since we tripled images
+    if (!row) return;
 
-    gsap.to(row, {
+    // Calculate total width of one set of images
+    const firstChild = row.firstChild;
+    if (!firstChild) return;
+
+    const gap = 24; // 6 in Tailwind = 24px
+    const cardWidth = 320; // w-80 = 320px
+    const totalWidth = (cardWidth + gap) * images.length;
+
+    // Start animation
+    animationRef.current = gsap.to(row, {
       x: direction === 'left' ? -totalWidth : totalWidth,
       duration: speed,
       ease: 'none',
       repeat: -1,
       modifiers: {
-        x: gsap.utils.unitize((x) => parseFloat(x) % totalWidth),
+        x: (x) => {
+          const numX = parseFloat(x);
+          return `${direction === 'left'
+            ? numX % totalWidth
+            : ((numX % totalWidth) + totalWidth) % totalWidth}px`;
+        },
       },
     });
-  }, [direction, speed]);
+
+    return () => {
+      if (animationRef.current) {
+        animationRef.current.kill();
+      }
+    };
+  }, [images, direction, speed]);
 
   // Triple the images for seamless infinite loop
-  const doubledImages = [...images, ...images, ...images];
+  const repeatedImages = [...images, ...images, ...images];
 
   return (
     <div className="overflow-hidden py-4">
-      <div ref={rowRef} className="flex gap-6" style={{ width: 'fit-content' }}>
-        {doubledImages.map((image, index) => (
+      <div ref={rowRef} className="flex gap-6" style={{ willChange: 'transform' }}>
+        {repeatedImages.map((image, index) => (
           <div
             key={`${image.id}-${index}`}
-            className="flex-shrink-0 w-80 h-64 rounded-2xl overflow-hidden group cursor-pointer"
+            className="flex-shrink-0 w-80 h-64 rounded-xl overflow-hidden group cursor-pointer bg-gray-100"
           >
-            <div
-              className={`w-full h-full bg-gradient-to-br ${image.color} flex items-center justify-center transform transition-transform duration-300 group-hover:scale-105`}
-            >
-              <div className="text-white text-center p-8">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full mx-auto mb-4 flex items-center justify-center">
-                  <svg
-                    className="w-8 h-8"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
+            <div className="w-full h-full relative transform transition-transform duration-300 group-hover:scale-105">
+              <Image
+                src={image.src}
+                alt={image.alt}
+                fill
+                className="object-cover"
+                sizes="320px"
+                onError={(e) => {
+                  // Fallback to gradient if image not found
+                  e.target.style.display = 'none';
+                  e.target.parentElement.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                }}
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all flex items-center justify-center">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold">{image.title}</h3>
-                <p className="text-sm mt-2 opacity-90">AI Generated</p>
               </div>
             </div>
           </div>
@@ -76,9 +94,9 @@ function CarouselRow({ images, direction = 'left', speed = 20 }) {
 export default function InfiniteCarousel() {
   return (
     <div className="w-full space-y-4">
-      <CarouselRow images={SAMPLE_IMAGES.slice(0, 4)} direction="left" speed={25} />
-      <CarouselRow images={SAMPLE_IMAGES.slice(2, 6)} direction="right" speed={30} />
-      <CarouselRow images={SAMPLE_IMAGES.slice(4, 8)} direction="left" speed={28} />
+      <CarouselRow images={STOCK_IMAGES.slice(0, 10)} direction="left" speed={40} />
+      <CarouselRow images={STOCK_IMAGES.slice(10, 20)} direction="right" speed={45} />
+      <CarouselRow images={STOCK_IMAGES.slice(20, 30)} direction="left" speed={42} />
     </div>
   );
 }
