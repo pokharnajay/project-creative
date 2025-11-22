@@ -150,7 +150,7 @@ export default function Model3DShowcase() {
               <div className="w-full h-full bg-gray-200 rounded-2xl overflow-hidden shadow-xl group-hover:shadow-2xl transition-shadow duration-300">
                 <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center relative">
                   <Image
-                    src={`/stock/${pose.link}`}
+                    src={`/models/${pose.link}`}
                     width={192}
                     height={256}
                     alt={`Professional model - ${pose.type}`}
