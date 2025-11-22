@@ -361,7 +361,7 @@ export default function Home() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="min-h-[65vh] max-h-[65vh] bg-white relative overflow-hidden flex items-center justify-center">
+      <section className="min-h-[75vh] max-h-[75vh] bg-white relative overflow-hidden flex items-center justify-center">
         <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 60, scale: 0.95 }}

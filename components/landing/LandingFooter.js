@@ -19,7 +19,7 @@ export default function LandingFooter() {
   };
 
   return (
-    <footer className="bg-gray-900 border-t border-gray-800 min-h-[35vh] flex flex-col justify-center">
+    <footer className="bg-gray-900 border-t border-gray-800 min-h-[25vh] flex flex-col justify-center">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 w-full">
         <motion.div
           variants={containerVariants}
