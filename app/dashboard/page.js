@@ -15,7 +15,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden pt-20">
         <FolderSidebar
           selectedFolder={selectedFolder}
           onSelectFolder={setSelectedFolder}

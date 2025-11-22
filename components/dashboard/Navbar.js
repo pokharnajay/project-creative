@@ -1,7 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useRouter, usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
 import Button from '@/components/ui/Button';
 import CreditDisplay from './CreditDisplay';
 
@@ -9,6 +11,16 @@ export default function Navbar() {
   const { user, profile, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -18,37 +30,50 @@ export default function Navbar() {
   const navLinks = [
     { href: '/generate', label: 'Generate' },
     { href: '/dashboard', label: 'Dashboard' },
-    { href: '/buy-credits', label: 'Buy Credits' },
   ];
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo & Navigation */}
-          <div className="flex items-center gap-10">
-            <h1
-              className="text-xl font-bold text-gray-900 cursor-pointer"
-              onClick={() => router.push('/')}
-            >
-              AI ImageGen
-            </h1>
-            <div className="hidden md:flex gap-1">
-              {navLinks.map((link) => (
-                <button
-                  key={link.href}
-                  onClick={() => router.push(link.href)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-                    pathname === link.href
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  {link.label}
-                </button>
-              ))}
+    <motion.header
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? 'bg-white/80 backdrop-blur-md shadow-sm' : 'bg-white border-b border-gray-100'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="flex justify-between items-center h-20">
+          {/* Logo */}
+          <motion.div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => router.push('/dashboard')}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-xl">AI</span>
             </div>
-          </div>
+            <span className="text-xl font-bold text-gray-900">
+              ImageGen
+            </span>
+          </motion.div>
+
+          {/* Navigation */}
+          <nav className="hidden md:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <button
+                key={link.href}
+                onClick={() => router.push(link.href)}
+                className={`text-sm font-medium transition-colors cursor-pointer ${
+                  pathname === link.href
+                    ? 'text-gray-900'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {link.label}
+              </button>
+            ))}
+          </nav>
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
@@ -69,7 +94,7 @@ export default function Navbar() {
                   variant="ghost"
                   size="sm"
                   onClick={handleSignOut}
-                  className="text-gray-600"
+                  className="text-gray-600 hover:text-gray-900"
                 >
                   Sign Out
                 </Button>
@@ -78,6 +103,6 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-    </nav>
+    </motion.header>
   );
 }

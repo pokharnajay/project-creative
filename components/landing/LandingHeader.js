@@ -47,7 +47,7 @@ export default function LandingHeader() {
           {/* Logo */}
           <motion.div
             className="flex items-center gap-3 cursor-pointer"
-            onClick={() => router.push('/')}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
