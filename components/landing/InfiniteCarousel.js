@@ -2,13 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import Image from 'next/image';
-
-// Register ScrollTrigger plugin
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 // Generate array of 30 stock images
 const STOCK_IMAGES = Array.from({ length: 30 }, (_, i) => ({
@@ -57,6 +52,9 @@ export default function InfiniteCarousel() {
   const containerRef = useRef();
 
   useEffect(() => {
+    // Register plugin inside useEffect to ensure it runs on client
+    gsap.registerPlugin(ScrollTrigger);
+
     const container = containerRef.current;
     if (!container) return;
 
@@ -83,7 +81,7 @@ export default function InfiniteCarousel() {
         start: 'top bottom', // Start when top of container hits bottom of viewport
         end: 'bottom top', // End when bottom of container hits top of viewport
         scrub: 1.5, // Smooth scrubbing with 1.5 second lag
-        // markers: true, // Uncomment to debug
+        // markers: true, // Debug markers enabled
       },
     });
 
