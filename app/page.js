@@ -32,12 +32,6 @@ export default function Home() {
   const modelsRef = useRef();
 
   useEffect(() => {
-    if (!loading && isAuthenticated) {
-      router.push('/dashboard');
-    }
-  }, [loading, isAuthenticated, router]);
-
-  useEffect(() => {
     // Hero animation
     if (heroRef.current) {
       gsap.fromTo(
@@ -158,41 +152,66 @@ export default function Home() {
               </p>
 
               <div className="hero-text flex flex-col sm:flex-row gap-4 pt-4">
-                <Button
-                  size="lg"
-                  onClick={() => router.push('/auth/signin')}
-                  className="bg-gray-900 hover:bg-gray-800 text-white text-lg px-8 py-4 shadow-lg"
-                >
-                  Start Creating Free
-                  <svg
-                    className="w-5 h-5 ml-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                {isAuthenticated ? (
+                  <Button
+                    size="lg"
+                    onClick={() => router.push('/dashboard')}
+                    className="bg-gray-900 hover:bg-gray-800 text-white text-lg px-8 py-4 shadow-lg"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={() => {
-                    const element = document.getElementById('showcase');
-                    if (element) {
-                      const yOffset = -80;
-                      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                      window.scrollTo({ top: y, behavior: 'smooth' });
-                    }
-                  }}
-                  className="text-gray-700 border-gray-300 hover:border-gray-900 text-lg px-8 py-4"
-                >
-                  View Examples
-                </Button>
+                    Go to Dashboard
+                    <svg
+                      className="w-5 h-5 ml-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
+                    </svg>
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      size="lg"
+                      onClick={() => router.push('/auth/signin')}
+                      className="bg-gray-900 hover:bg-gray-800 text-white text-lg px-8 py-4 shadow-lg"
+                    >
+                      Start Creating Free
+                      <svg
+                        className="w-5 h-5 ml-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 7l5 5m0 0l-5 5m5-5H6"
+                        />
+                      </svg>
+                    </Button>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      onClick={() => {
+                        const element = document.getElementById('showcase');
+                        if (element) {
+                          const yOffset = -80;
+                          const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                          window.scrollTo({ top: y, behavior: 'smooth' });
+                        }
+                      }}
+                      className="text-gray-700 border-gray-300 hover:border-gray-900 text-lg px-8 py-4"
+                    >
+                      View Examples
+                    </Button>
+                  </>
+                )}
               </div>
 
               {/* Stats */}
@@ -350,10 +369,10 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
-                onClick={() => router.push('/auth/signin')}
+                onClick={() => router.push(isAuthenticated ? '/dashboard' : '/auth/signin')}
                 className="bg-gray-800 text-white hover:bg-gray-950 text-lg px-10 py-4"
               >
-                Start Free Trial
+                {isAuthenticated ? 'Go to Dashboard' : 'Start Free Trial'}
               </Button>
               {/* <Button
                 variant="outline"

@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/components/providers/AuthProvider';
 
 export default function LandingHeader() {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -81,21 +83,33 @@ export default function LandingHeader() {
 
           {/* CTA Button */}
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push('/auth/signin')}
-              className="hidden sm:inline-flex hover:border-[0.1px] hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-400 ease-in-out"
-            >
-              Sign In
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => router.push('/auth/signin')}
-              className="bg-gray-900 hover:bg-gray-800 text-white"
-            >
-              Get Started
-            </Button>
+            {isAuthenticated ? (
+              <Button
+                size="sm"
+                onClick={() => router.push('/dashboard')}
+                className="bg-gray-900 hover:bg-gray-800 text-white"
+              >
+                Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push('/auth/signin')}
+                  className="hidden sm:inline-flex hover:border-[0.1px] hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-400 ease-in-out"
+                >
+                  Sign In
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => router.push('/auth/signin')}
+                  className="bg-gray-900 hover:bg-gray-800 text-white"
+                >
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
