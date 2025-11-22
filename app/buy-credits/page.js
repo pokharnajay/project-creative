@@ -141,6 +141,7 @@ export default function BuyCreditsPage() {
   };
 
   const verifyPayment = async (razorpayResponse) => {
+    console.log('verifyPayment called with:', razorpayResponse);
     try {
       const verifyResponse = await fetch('/api/payments/verify', {
         method: 'POST',
@@ -152,19 +153,40 @@ export default function BuyCreditsPage() {
         }),
       });
 
+      console.log('verifyResponse status:', verifyResponse.status);
       const verifyData = await verifyResponse.json();
+      console.log('verifyData:', verifyData);
 
       if (!verifyResponse.ok) {
         throw new Error(verifyData.error || 'Payment verification failed');
       }
 
-      setSuccess(`Successfully added ${verifyData.creditsAdded.toLocaleString()} credits to your account.`);
-      await refreshProfile();
-      await fetchPaymentHistory();
+      const creditsAdded = verifyData.creditsAdded || verifyData.credits || 0;
+      console.log('Setting success, creditsAdded:', creditsAdded);
+      setSuccess(`Successfully added ${creditsAdded.toLocaleString()} credits to your account.`);
+
+      console.log('Calling refreshProfile...');
+      try {
+        await refreshProfile();
+        console.log('refreshProfile completed');
+      } catch (refreshErr) {
+        console.error('refreshProfile error:', refreshErr);
+      }
+
+      console.log('Calling fetchPaymentHistory...');
+      try {
+        await fetchPaymentHistory();
+        console.log('fetchPaymentHistory completed');
+      } catch (historyErr) {
+        console.error('fetchPaymentHistory error:', historyErr);
+      }
+
+      console.log('All done, setting loading to false');
     } catch (err) {
       console.error('Error verifying payment:', err);
       setError(err.message || 'Payment verification failed. Please contact support.');
     } finally {
+      console.log('Finally block, setting loading false');
       setLoading(false);
     }
   };
