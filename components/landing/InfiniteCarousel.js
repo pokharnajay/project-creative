@@ -73,54 +73,38 @@ export default function InfiniteCarousel() {
 
     if (!row0 || !row1 || !row2) return;
 
-    // Set initial positions - start with some offset so there's room to move
-    gsap.set(row0, { x: -totalWidth * 0.3 });
-    gsap.set(row1, { x: -totalWidth * 0.7 });
-    gsap.set(row2, { x: -totalWidth * 0.2 });
+    // Set initial position for right direction to enable seamless loop
+    gsap.set(row1, { x: -totalWidth });
 
-    // SCROLL SPEED & SMOOTHNESS PARAMETERS:
-    // - scrub: Higher number = smoother/slower (1 = fast, 3 = very smooth, 5 = ultra smooth)
-    // - Movement amount: Higher = more movement per scroll
+    // Create scroll-triggered timeline with smooth scrubbing
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: container,
+        start: 'top bottom', // Start when top of container hits bottom of viewport
+        end: 'bottom top', // End when bottom of container hits top of viewport
+        scrub: 1.5, // Smooth scrubbing with 1.5 second lag
+        // markers: true, // Uncomment to debug
+      },
+    });
 
-    // Create scroll-triggered animation for each row
-    // Using the document/window as the scroll source, not the container
+    // Animate each row - rows move in different directions
+    // Row 0: moves left (negative x)
+    tl.to(row0, {
+      x: -totalWidth * 1.5,
+      ease: 'none',
+    }, 0);
 
-    // Row 0: moves left as you scroll down
-    gsap.to(row0, {
+    // Row 1: moves right (positive x) - starts from -totalWidth
+    tl.to(row1, {
+      x: totalWidth * 0.5,
+      ease: 'none',
+    }, 0);
+
+    // Row 2: moves left (negative x) - slightly different speed
+    tl.to(row2, {
       x: -totalWidth * 1.2,
       ease: 'none',
-      scrollTrigger: {
-        trigger: container,
-        start: 'top bottom',    // Start when container top hits viewport bottom
-        end: 'bottom top',      // End when container bottom hits viewport top
-        scrub: 2,               // Smooth scrubbing (1-5, higher = smoother)
-        // markers: true,       // Uncomment to debug
-      },
-    });
-
-    // Row 1: moves right as you scroll down (opposite direction)
-    gsap.to(row1, {
-      x: -totalWidth * 0.2,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: container,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 2.5,
-      },
-    });
-
-    // Row 2: moves left as you scroll down
-    gsap.to(row2, {
-      x: -totalWidth * 1.0,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: container,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 2,
-      },
-    });
+    }, 0);
 
     // Cleanup
     return () => {

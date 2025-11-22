@@ -356,12 +356,8 @@ export default function Home() {
       </section>
 
       {/* Model Showcase Section */}
-      <section id="models" ref={modelsRef} className="py-24 bg-[rgba(0,0,0,0.13)] ">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="section-content">
-            <Model3DShowcase />
-          </div>
-        </div>
+      <section id="models" ref={modelsRef} className="bg-[rgba(0,0,0,0.13)]">
+        <Model3DShowcase />
       </section>
 
       {/* Final CTA Section */}

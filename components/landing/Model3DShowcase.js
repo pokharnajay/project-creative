@@ -20,53 +20,58 @@ const MODEL_POSES = [
 ];
 
 export default function Model3DShowcase() {
-  const containerRef = useRef();
+  const sectionRef = useRef();
   const imagesContainerRef = useRef();
 
   useEffect(() => {
-    const container = containerRef.current;
+    const section = sectionRef.current;
     const imagesContainer = imagesContainerRef.current;
-    if (!container || !imagesContainer) return;
+    if (!section || !imagesContainer) return;
 
     // Get all model image elements
     const modelImages = imagesContainer.querySelectorAll('.model-image');
     if (modelImages.length === 0) return;
 
-    // Set initial state - all images start small and slightly transparent
+    // Set initial state - all images start small and transparent
     gsap.set(modelImages, {
-      scale: 0.7,
-      opacity: 0.3,
+      scale: 0.6,
+      opacity: 0,
     });
 
-    // Create a timeline for each image with staggered scroll triggers
+    // Create a pinned timeline for the entire sequence
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: '+=200%', // Pin for 200% of viewport height (gives time for all animations)
+        pin: true,
+        scrub: 1,
+        // markers: true, // Uncomment to debug
+      },
+    });
+
+    // Animate each image sequentially - scale up then slightly back
     modelImages.forEach((image, index) => {
-      // Each image has its own scroll trigger that fires sequentially
-      gsap.to(image, {
-        scale: 1,
-        opacity: 1,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: container,
-          start: `top+=${index * 15}% center`, // Stagger start points
-          end: `top+=${(index + 1) * 15 + 20}% center`,
-          scrub: 2, // Very smooth scrubbing
-          // markers: true, // Uncomment to debug
-        },
-      });
+      const startTime = index * 0.15; // Stagger start times
 
-      // Scale back down as user continues scrolling
-      gsap.to(image, {
-        scale: 0.85,
-        opacity: 0.7,
-        ease: 'power2.in',
-        scrollTrigger: {
-          trigger: container,
-          start: `top+=${(index + 1) * 15 + 25}% center`,
-          end: `bottom-=${(4 - index) * 10}% center`,
-          scrub: 2,
-        },
-      });
+      // Scale up and fade in
+      tl.to(image, {
+        scale: 1.1,
+        opacity: 1,
+        duration: 0.12,
+        ease: 'power2.out',
+      }, startTime);
+
+      // Scale back to normal
+      tl.to(image, {
+        scale: 1,
+        duration: 0.08,
+        ease: 'power2.inOut',
+      }, startTime + 0.12);
     });
+
+    // Hold at the end briefly before unpinning
+    tl.to({}, { duration: 0.2 });
 
     // Cleanup
     return () => {
@@ -75,8 +80,8 @@ export default function Model3DShowcase() {
   }, []);
 
   return (
-    <div ref={containerRef} className="w-full max-w-7xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+    <div ref={sectionRef} className="w-full max-w-7xl mx-auto min-h-screen flex items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center w-full">
         {/* Left Side - Text Content */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
