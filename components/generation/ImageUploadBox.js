@@ -5,7 +5,7 @@ import { useDropzone } from 'react-dropzone';
 import { cn } from '@/utils/cn';
 import Loader from '@/components/ui/Loader';
 
-export default function ImageUploadBox({ onUpload, label, existingImage }) {
+export default function ImageUploadBox({ onUpload, label, existingImage, className }) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(existingImage || null);
   const [error, setError] = useState(null);
@@ -71,33 +71,36 @@ export default function ImageUploadBox({ onUpload, label, existingImage }) {
   };
 
   return (
-    <div className="w-full">
-      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+    <div className={cn("w-full h-full flex flex-col", className)}>
+      {label && (
+        <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+      )}
       <div
         {...getRootProps()}
         className={cn(
-          'relative border-2 border-dashed rounded-xl p-6 transition-all cursor-pointer',
+          'relative border-2 border-dashed rounded-xl transition-all cursor-pointer flex-1 min-h-[280px]',
           isDragActive ? 'border-gray-900 bg-gray-100' : 'border-gray-200 hover:border-gray-400',
-          preview ? 'bg-gray-50' : 'bg-white'
+          preview ? 'p-0 border-solid' : 'p-6 bg-white'
         )}
       >
         <input {...getInputProps()} />
 
         {uploading ? (
-          <div className="flex flex-col items-center justify-center py-8">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white rounded-xl">
             <Loader size="lg" />
             <p className="mt-4 text-sm text-gray-600">Uploading...</p>
           </div>
         ) : preview ? (
-          <div className="relative">
+          <div className="relative w-full h-full min-h-[280px]">
             <img
               src={preview}
               alt="Preview"
-              className="w-full h-48 object-contain rounded-lg"
+              className="w-full h-full object-cover rounded-xl"
             />
+            {/* Remove button - top right corner */}
             <button
               onClick={handleRemove}
-              className="absolute top-2 right-2 bg-gray-900 text-white p-2 rounded-full hover:bg-gray-700 transition-colors cursor-pointer"
+              className="absolute top-3 right-3 bg-gray-900/80 hover:bg-gray-900 text-white p-2 rounded-full transition-all cursor-pointer backdrop-blur-sm shadow-lg"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -116,7 +119,7 @@ export default function ImageUploadBox({ onUpload, label, existingImage }) {
             </button>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-8">
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
             <svg
               className="w-12 h-12 text-gray-400 mb-3"
               fill="none"
@@ -126,14 +129,14 @@ export default function ImageUploadBox({ onUpload, label, existingImage }) {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={1.5}
                 d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
               />
             </svg>
             <p className="text-sm text-gray-600 text-center">
               {isDragActive ? 'Drop the image here' : 'Drag & drop an image, or click to select'}
             </p>
-            <p className="text-xs text-gray-500 mt-2">PNG, JPG, WebP up to 10MB</p>
+            <p className="text-xs text-gray-400 mt-2">PNG, JPG, WebP up to 10MB</p>
           </div>
         )}
       </div>
