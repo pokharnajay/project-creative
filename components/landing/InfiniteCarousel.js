@@ -18,15 +18,12 @@ const STOCK_IMAGES = Array.from({ length: 30 }, (_, i) => ({
 }));
 
 function CarouselRow({ images, direction = 'left', rowIndex = 0 }) {
-  const rowRef = useRef();
-
   // Triple the images for seamless infinite loop visual
   const repeatedImages = [...images, ...images, ...images];
 
   return (
     <div className="overflow-hidden py-4">
       <div
-        ref={rowRef}
         className={`carousel-row-${rowIndex} flex gap-6`}
         style={{ willChange: 'transform' }}
       >
@@ -76,47 +73,54 @@ export default function InfiniteCarousel() {
 
     if (!row0 || !row1 || !row2) return;
 
-    // Set initial positions
-    gsap.set(row0, { x: 0 });
-    gsap.set(row1, { x: -totalWidth }); // Start offset for opposite direction
-    gsap.set(row2, { x: 0 });
+    // Set initial positions - start with some offset so there's room to move
+    gsap.set(row0, { x: -totalWidth * 0.3 });
+    gsap.set(row1, { x: -totalWidth * 0.7 });
+    gsap.set(row2, { x: -totalWidth * 0.2 });
 
-    // Create scroll-triggered timeline with smooth scrubbing
     // SCROLL SPEED & SMOOTHNESS PARAMETERS:
     // - scrub: Higher number = smoother/slower (1 = fast, 3 = very smooth, 5 = ultra smooth)
-    // - totalWidth multiplier: Higher = more movement per scroll (1.5 = normal, 0.8 = slower movement)
-    const tl = gsap.timeline({
+    // - Movement amount: Higher = more movement per scroll
+
+    // Create scroll-triggered animation for each row
+    // Using the document/window as the scroll source, not the container
+
+    // Row 0: moves left as you scroll down
+    gsap.to(row0, {
+      x: -totalWidth * 1.2,
+      ease: 'none',
       scrollTrigger: {
         trigger: container,
-        start: 'top bottom', // Start when top of container hits bottom of viewport
-        end: 'bottom top', // End when bottom of container hits top of viewport
-        scrub: 3, // Ultra smooth scrubbing - increase for smoother, decrease for more responsive
-        // markers: true, // Uncomment to debug
+        start: 'top bottom',    // Start when container top hits viewport bottom
+        end: 'bottom top',      // End when container bottom hits viewport top
+        scrub: 2,               // Smooth scrubbing (1-5, higher = smoother)
+        // markers: true,       // Uncomment to debug
       },
     });
 
-    // MOVEMENT SPEED: Adjust the multiplier to change how far each row moves
-    // Lower multiplier = slower/less movement, Higher = faster/more movement
-    const movementMultiplier = 0.8; // Adjust this for overall movement speed
-
-    // Animate each row - rows move in different directions
-    // Row 0: moves left (negative x)
-    tl.to(row0, {
-      x: -totalWidth * movementMultiplier,
+    // Row 1: moves right as you scroll down (opposite direction)
+    gsap.to(row1, {
+      x: -totalWidth * 0.2,
       ease: 'none',
-    }, 0);
+      scrollTrigger: {
+        trigger: container,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 2.5,
+      },
+    });
 
-    // Row 1: moves right (positive x) - starts from -totalWidth
-    tl.to(row1, {
-      x: totalWidth * (movementMultiplier * 0.6),
+    // Row 2: moves left as you scroll down
+    gsap.to(row2, {
+      x: -totalWidth * 1.0,
       ease: 'none',
-    }, 0);
-
-    // Row 2: moves left (negative x) - slightly different speed
-    tl.to(row2, {
-      x: -totalWidth * (movementMultiplier * 0.7),
-      ease: 'none',
-    }, 0);
+      scrollTrigger: {
+        trigger: container,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 2,
+      },
+    });
 
     // Cleanup
     return () => {
