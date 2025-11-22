@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
-import { uploadToGCS } from '@/lib/google-cloud';
 import { nanoid } from 'nanoid';
 
 export async function POST(request) {
@@ -46,14 +45,59 @@ export async function POST(request) {
     const fileExtension = file.name.split('.').pop();
     const fileName = `${user.id}/${nanoid()}.${fileExtension}`;
 
-    // Upload to Google Cloud Storage
-    const url = await uploadToGCS(buffer, fileName, file.type);
+    // Try Google Cloud Storage first if configured
+    const hasGCS = process.env.GCS_PROJECT_ID &&
+                   process.env.GCS_CLIENT_EMAIL &&
+                   process.env.GCS_PRIVATE_KEY &&
+                   process.env.GCS_BUCKET_NAME;
 
-    return NextResponse.json({ url });
+    if (hasGCS) {
+      try {
+        const { uploadToGCS } = await import('@/lib/google-cloud');
+        const url = await uploadToGCS(buffer, fileName, file.type);
+        return NextResponse.json({ url });
+      } catch (gcsError) {
+        console.error('GCS upload failed, falling back to Supabase:', gcsError.message);
+        // Fall through to Supabase storage
+      }
+    }
+
+    // Use Supabase Storage as fallback
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('uploads')
+      .upload(fileName, buffer, {
+        contentType: file.type,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error('Supabase storage error:', uploadError);
+      // Check for common errors
+      if (uploadError.message?.includes('not found') || uploadError.statusCode === '404') {
+        return NextResponse.json(
+          { error: 'Storage bucket not configured. Please create "uploads" bucket in Supabase.' },
+          { status: 500 }
+        );
+      }
+      if (uploadError.message?.includes('row-level security') || uploadError.message?.includes('policy')) {
+        return NextResponse.json(
+          { error: 'Storage permissions not configured. Please check Supabase storage policies.' },
+          { status: 500 }
+        );
+      }
+      throw uploadError;
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('uploads')
+      .getPublicUrl(fileName);
+
+    return NextResponse.json({ url: publicUrl });
   } catch (error) {
     console.error('Error uploading file:', error);
     return NextResponse.json(
-      { error: 'Failed to upload file' },
+      { error: error.message || 'Failed to upload file. Please check storage configuration.' },
       { status: 500 }
     );
   }

@@ -5,8 +5,8 @@ import { useAuth } from '@/components/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/dashboard/Navbar';
 import ImageUploadBox from '@/components/generation/ImageUploadBox';
+import ModelSelector from '@/components/generation/ModelSelector';
 import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
 import Card, { CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import Loader from '@/components/ui/Loader';
 
@@ -71,8 +71,9 @@ export default function GeneratePage() {
     <div className="min-h-screen bg-white">
       <Navbar />
 
-      <main className="bg-gray-50/50 pt-20">
+      <main className="bg-gray-50/50 pt-20 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
           <div className="mb-8">
             <h1 className="text-2xl font-semibold text-gray-900 mb-2">Generate AI Images</h1>
             <p className="text-gray-500 text-sm">
@@ -80,144 +81,156 @@ export default function GeneratePage() {
             </p>
           </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column - Upload & Settings */}
-          <div className="space-y-6">
+          {/* Upload Section - Product and Model side by side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Product Image */}
             <Card>
               <CardHeader>
-                <CardTitle>Upload Images</CardTitle>
+                <CardTitle>Product Image</CardTitle>
                 <CardDescription>
-                  Upload a product image and optionally a model image for combined shots
+                  Upload the product you want to showcase
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <ImageUploadBox
-                    label="Product Image *"
-                    onUpload={setProductImage}
-                    existingImage={productImage}
-                  />
-                  <ImageUploadBox
-                    label="Model Image (Optional)"
-                    onUpload={setModelImage}
-                    existingImage={modelImage}
-                  />
-                </div>
+                <ImageUploadBox
+                  label="Product Image *"
+                  onUpload={setProductImage}
+                  existingImage={productImage}
+                />
               </CardContent>
             </Card>
 
+            {/* Model Selection */}
             <Card>
               <CardHeader>
-                <CardTitle>Generation Settings</CardTitle>
+                <CardTitle>Model Selection</CardTitle>
+                <CardDescription>
+                  Choose a default model or upload your own
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Number of Variations
-                    </label>
-                    <select
-                      value={numVariations}
-                      onChange={(e) => setNumVariations(parseInt(e.target.value))}
-                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all cursor-pointer"
-                    >
-                      <option value={1}>1 image (5 credits)</option>
-                      <option value={2}>2 images (10 credits)</option>
-                      <option value={3}>3 images (15 credits)</option>
-                      <option value={4}>4 images (20 credits)</option>
-                    </select>
-                  </div>
+                <ModelSelector
+                  onSelect={setModelImage}
+                  existingImage={modelImage}
+                />
+              </CardContent>
+            </Card>
+          </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Prompt *
-                    </label>
-                    <textarea
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      placeholder="Describe the style, setting, and mood for your image. E.g., 'Professional studio lighting, modern minimalist background, fashion magazine style'"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all resize-none text-gray-900 placeholder-gray-400"
-                      rows={5}
-                    />
-                  </div>
-
-                  {error && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
-                      <p className="text-sm text-red-700">{error}</p>
-                    </div>
-                  )}
-
-                  <Button
-                    onClick={handleGenerate}
-                    loading={generating}
-                    disabled={!productImage || !prompt.trim()}
-                    className="w-full"
-                    size="lg"
+          {/* Settings Section */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Generation Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Number of Variations
+                  </label>
+                  <select
+                    value={numVariations}
+                    onChange={(e) => setNumVariations(parseInt(e.target.value))}
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all cursor-pointer"
                   >
-                    Generate Images
-                  </Button>
+                    <option value={1}>1 image (5 credits)</option>
+                    <option value={2}>2 images (10 credits)</option>
+                    <option value={3}>3 images (15 credits)</option>
+                    <option value={4}>4 images (20 credits)</option>
+                  </select>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
 
-          {/* Right Column - Results */}
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>Generated Images</CardTitle>
-                <CardDescription>Your generated images will appear here</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {generating ? (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <Loader size="lg" />
-                    <p className="mt-4 text-gray-600">Generating your images...</p>
-                    <p className="text-sm text-gray-500 mt-2">This may take up to 60 seconds</p>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Prompt *
+                  </label>
+                  <textarea
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder="Describe the style, setting, and mood for your image. E.g., 'Professional studio lighting, modern minimalist background, fashion magazine style'"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all resize-none text-gray-900 placeholder-gray-400"
+                    rows={4}
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+
+              <div className="mt-6">
+                <Button
+                  onClick={handleGenerate}
+                  loading={generating}
+                  disabled={!productImage || !prompt.trim()}
+                  className="w-full lg:w-auto px-8"
+                  size="lg"
+                >
+                  Generate Images
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Generated Images Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Generated Images</CardTitle>
+              <CardDescription>Your generated images will appear here</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {generating ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <Loader size="lg" />
+                  <p className="mt-4 text-gray-600">Generating your images...</p>
+                  <p className="text-sm text-gray-500 mt-2">This may take up to 60 seconds</p>
+                </div>
+              ) : generatedImages.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
+                    <p className="text-green-800 font-medium">
+                      Successfully generated {generatedImages.length} image(s)!
+                    </p>
+                    <p className="text-sm text-green-700 mt-1">
+                      Redirecting to dashboard...
+                    </p>
                   </div>
-                ) : generatedImages.length > 0 ? (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                      <p className="text-green-800 font-medium">
-                        Successfully generated {generatedImages.length} image(s)!
-                      </p>
-                      <p className="text-sm text-green-700 mt-1">
-                        Redirecting to dashboard...
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-1 gap-4">
-                      {generatedImages.map((image, index) => (
-                        <img
-                          key={index}
-                          src={image.url}
-                          alt={`Generated ${index + 1}`}
-                          className="w-full rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-                    <svg
-                      className="w-16 h-16 mb-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {generatedImages.map((image, index) => (
+                      <img
+                        key={index}
+                        src={image.url}
+                        alt={`Generated ${index + 1}`}
+                        className="w-full rounded-xl cursor-pointer hover:opacity-90 transition-opacity shadow-lg"
                       />
-                    </svg>
-                    <p className="text-sm">No images generated yet</p>
+                    ))}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                  <svg
+                    className="w-20 h-20 mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <p className="text-sm">No images generated yet</p>
+                  <p className="text-xs text-gray-300 mt-2">
+                    Upload a product image, select a model, and enter a prompt to get started
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>
