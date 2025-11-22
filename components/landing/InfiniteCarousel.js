@@ -82,32 +82,39 @@ export default function InfiniteCarousel() {
     gsap.set(row2, { x: 0 });
 
     // Create scroll-triggered timeline with smooth scrubbing
+    // SCROLL SPEED & SMOOTHNESS PARAMETERS:
+    // - scrub: Higher number = smoother/slower (1 = fast, 3 = very smooth, 5 = ultra smooth)
+    // - totalWidth multiplier: Higher = more movement per scroll (1.5 = normal, 0.8 = slower movement)
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: container,
         start: 'top bottom', // Start when top of container hits bottom of viewport
         end: 'bottom top', // End when bottom of container hits top of viewport
-        scrub: 1.5, // Smooth scrubbing with 1.5 second lag for ultra-smooth feel
+        scrub: 3, // Ultra smooth scrubbing - increase for smoother, decrease for more responsive
         // markers: true, // Uncomment to debug
       },
     });
 
+    // MOVEMENT SPEED: Adjust the multiplier to change how far each row moves
+    // Lower multiplier = slower/less movement, Higher = faster/more movement
+    const movementMultiplier = 0.8; // Adjust this for overall movement speed
+
     // Animate each row - rows move in different directions
     // Row 0: moves left (negative x)
     tl.to(row0, {
-      x: -totalWidth * 1.5,
+      x: -totalWidth * movementMultiplier,
       ease: 'none',
     }, 0);
 
     // Row 1: moves right (positive x) - starts from -totalWidth
     tl.to(row1, {
-      x: totalWidth * 0.5,
+      x: totalWidth * (movementMultiplier * 0.6),
       ease: 'none',
     }, 0);
 
     // Row 2: moves left (negative x) - slightly different speed
     tl.to(row2, {
-      x: -totalWidth * 1.2,
+      x: -totalWidth * (movementMultiplier * 0.7),
       ease: 'none',
     }, 0);
 

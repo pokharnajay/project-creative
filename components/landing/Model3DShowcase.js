@@ -1,19 +1,81 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
 
+// Register ScrollTrigger plugin
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
 const MODEL_POSES = [
-  { id: 1, type: 'Full Length', position: 'top-0 left-0 z-10', rotation: '-rotate-3', size: 'w-48 h-64', link : 'Model1.jpg' },
-  { id: 2, type: 'Waist Length', position: 'top-8 left-32 z-20', rotation: 'rotate-2', size: 'w-44 h-60', link : 'Model2.jpg' },
-  { id: 3, type: 'Close Up', position: 'top-16 left-64 z-30', rotation: '-rotate-1', size: 'w-48 h-64', link : 'Model3.jpg' },
-  { id: 4, type: 'Left Profile', position: 'top-4 left-96 z-20', rotation: 'rotate-2', size: 'w-40 h-56', link : 'Model4.jpg' },
-  { id: 5, type: 'Right Profile', position: 'top-12 left-[29rem] z-10', rotation: '-rotate-3', size: 'w-44 h-60', link : 'Model5.jpg' },
+  { id: 1, type: 'Full Length', position: 'top-0 left-0 z-10', rotation: '-rotate-3', size: 'w-48 h-64', link: 'Model1.jpg' },
+  { id: 2, type: 'Waist Length', position: 'top-8 left-32 z-20', rotation: 'rotate-2', size: 'w-44 h-60', link: 'Model2.jpg' },
+  { id: 3, type: 'Close Up', position: 'top-16 left-64 z-30', rotation: '-rotate-1', size: 'w-48 h-64', link: 'Model3.jpg' },
+  { id: 4, type: 'Left Profile', position: 'top-4 left-96 z-20', rotation: 'rotate-2', size: 'w-40 h-56', link: 'Model4.jpg' },
+  { id: 5, type: 'Right Profile', position: 'top-12 left-[29rem] z-10', rotation: '-rotate-3', size: 'w-44 h-60', link: 'Model5.jpg' },
 ];
 
 export default function Model3DShowcase() {
+  const containerRef = useRef();
+  const imagesContainerRef = useRef();
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const imagesContainer = imagesContainerRef.current;
+    if (!container || !imagesContainer) return;
+
+    // Get all model image elements
+    const modelImages = imagesContainer.querySelectorAll('.model-image');
+    if (modelImages.length === 0) return;
+
+    // Set initial state - all images start small and slightly transparent
+    gsap.set(modelImages, {
+      scale: 0.7,
+      opacity: 0.3,
+    });
+
+    // Create a timeline for each image with staggered scroll triggers
+    modelImages.forEach((image, index) => {
+      // Each image has its own scroll trigger that fires sequentially
+      gsap.to(image, {
+        scale: 1,
+        opacity: 1,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: container,
+          start: `top+=${index * 15}% center`, // Stagger start points
+          end: `top+=${(index + 1) * 15 + 20}% center`,
+          scrub: 2, // Very smooth scrubbing
+          // markers: true, // Uncomment to debug
+        },
+      });
+
+      // Scale back down as user continues scrolling
+      gsap.to(image, {
+        scale: 0.85,
+        opacity: 0.7,
+        ease: 'power2.in',
+        scrollTrigger: {
+          trigger: container,
+          start: `top+=${(index + 1) * 15 + 25}% center`,
+          end: `bottom-=${(4 - index) * 10}% center`,
+          scrub: 2,
+        },
+      });
+    });
+
+    // Cleanup
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
   return (
-    <div className="w-full max-w-7xl mx-auto">
+    <div ref={containerRef} className="w-full max-w-7xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         {/* Left Side - Text Content */}
         <motion.div
@@ -69,38 +131,31 @@ export default function Model3DShowcase() {
           </div>
         </motion.div>
 
-        {/* Right Side - Collaged Model Photos */}
-        <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+        {/* Right Side - Collaged Model Photos with GSAP Scroll Animation */}
+        <div
+          ref={imagesContainerRef}
           className="relative h-[500px] hidden lg:block mt-[10%]"
         >
           {MODEL_POSES.map((pose, index) => (
-            <motion.div
+            <div
               key={pose.id}
-              initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.01, duration: 0.6 }}
-              whileHover={{ scale: 1.05, rotate: 0, zIndex: 40 }}
-              className={`absolute ${pose.position} ${pose.size} ${pose.rotation} cursor-pointer group`}
+              className={`model-image absolute ${pose.position} ${pose.size} ${pose.rotation} cursor-pointer group`}
+              style={{ willChange: 'transform, opacity' }}
             >
-              <div className="w-full h-full bg-gray-200 rounded-2xl overflow-hidden shadow-xl group-hover:shadow-2xl transition-all duration-300">
+              <div className="w-full h-full bg-gray-200 rounded-2xl overflow-hidden shadow-xl group-hover:shadow-2xl transition-shadow duration-300">
                 <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center relative">
-                  {/* Placeholder for model image */}
-                  <Image src={`/stock/${pose.link}`} width={0} height={0} className={`${pose.size} object-contain`} alt={`${pose.link}`} />
-                  
-
-
-                  {/* Hover overlay */}
-                  
+                  <Image
+                    src={`/stock/${pose.link}`}
+                    width={0}
+                    height={0}
+                    className={`${pose.size} object-contain`}
+                    alt={`${pose.link}`}
+                  />
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
         {/* Mobile View - Simple Grid */}
         <div className="lg:hidden grid grid-cols-2 gap-4">
