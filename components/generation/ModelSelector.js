@@ -7,15 +7,15 @@ import Image from 'next/image';
 
 // Default models from stock folder
 const DEFAULT_MODELS = [
-  { id: 1, src: '/stock/Model1.jpeg', name: 'Model 1' },
-  { id: 2, src: '/stock/Model2.jpeg', name: 'Model 2' },
-  { id: 3, src: '/stock/Model3.jpeg', name: 'Model 3' },
-  { id: 4, src: '/stock/Model4.jpeg', name: 'Model 4' },
-  { id: 5, src: '/stock/Model5.jpeg', name: 'Model 5' },
-  { id: 6, src: '/stock/Model6.jpeg', name: 'Model 6' },
-  { id: 7, src: '/stock/Model7.jpeg', name: 'Model 7' },
-  { id: 8, src: '/stock/Model8.jpeg', name: 'Model 8' },
-  { id: 9, src: '/stock/Model9.jpeg', name: 'Model 9' },
+  { id: 1, src: '/models/Model1.jpeg', name: 'Model 1' },
+  { id: 2, src: '/models/Model2.jpeg', name: 'Model 2' },
+  { id: 3, src: '/models/Model3.jpeg', name: 'Model 3' },
+  { id: 4, src: '/models/Model4.jpeg', name: 'Model 4' },
+  { id: 5, src: '/models/Model5.jpeg', name: 'Model 5' },
+  { id: 6, src: '/models/Model6.jpeg', name: 'Model 6' },
+  { id: 7, src: '/models/Model7.jpeg', name: 'Model 7' },
+  { id: 8, src: '/models/Model8.jpeg', name: 'Model 8' },
+  { id: 9, src: '/models/Model9.jpeg', name: 'Model 9' },
 ];
 
 export default function ModelSelector({ onSelect, existingImage }) {
