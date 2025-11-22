@@ -2,19 +2,14 @@
 
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import Image from 'next/image';
 
-// Register ScrollTrigger plugin
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
-// Generate array of 30 stock images
-const STOCK_IMAGES = Array.from({ length: 30 }, (_, i) => ({
+// Generate array of 22 stock images
+const STOCK_IMAGES = Array.from({ length: 23 }, (_, i) => ({
   id: i + 1,
-  src: `/stock/${i + 1}.jpg`,
-  alt: `Product ${i + 1}`,
+  src: `/stock/${i}.jpeg`,
+  alt: `Product ${i}`,
 }));
 
 function CarouselRow({ images, direction = 'left', rowIndex = 0 }) {
@@ -60,13 +55,16 @@ export default function InfiniteCarousel() {
   const containerRef = useRef();
 
   useEffect(() => {
+    // Register plugin inside useEffect to ensure it runs on client
+    gsap.registerPlugin(ScrollTrigger);
+
     const container = containerRef.current;
     if (!container) return;
 
     // Calculate dimensions
     const gap = 24; // 6 in Tailwind = 24px
     const cardWidth = 320; // w-80 = 320px
-    const imagesPerRow = 10;
+    const imagesPerRow = 7;
     const totalWidth = (cardWidth + gap) * imagesPerRow;
 
     // Get all carousel rows
@@ -86,7 +84,7 @@ export default function InfiniteCarousel() {
         start: 'top bottom', // Start when top of container hits bottom of viewport
         end: 'bottom top', // End when bottom of container hits top of viewport
         scrub: 1.5, // Smooth scrubbing with 1.5 second lag
-        // markers: true, // Uncomment to debug
+        // markers: true, // Debug markers enabled
       },
     });
 
@@ -117,9 +115,9 @@ export default function InfiniteCarousel() {
 
   return (
     <div ref={containerRef} className="w-full space-y-4 overflow-hidden">
-      <CarouselRow images={STOCK_IMAGES.slice(0, 10)} direction="left" rowIndex={0} />
-      <CarouselRow images={STOCK_IMAGES.slice(10, 20)} direction="right" rowIndex={1} />
-      <CarouselRow images={STOCK_IMAGES.slice(20, 30)} direction="left" rowIndex={2} />
+      <CarouselRow images={STOCK_IMAGES.slice(0, 7)} direction="left" rowIndex={0} />
+      <CarouselRow images={STOCK_IMAGES.slice(7, 14)} direction="right" rowIndex={1} />
+      <CarouselRow images={STOCK_IMAGES.slice(14, 22)} direction="left" rowIndex={2} />
     </div>
   );
 }

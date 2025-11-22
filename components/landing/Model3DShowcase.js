@@ -12,11 +12,11 @@ if (typeof window !== 'undefined') {
 }
 
 const MODEL_POSES = [
-  { id: 1, type: 'Full Length', position: 'top-0 left-0 z-10', rotation: '-rotate-3', size: 'w-48 h-64', link: 'Model1.jpg' },
-  { id: 2, type: 'Waist Length', position: 'top-8 left-32 z-20', rotation: 'rotate-2', size: 'w-44 h-60', link: 'Model2.jpg' },
-  { id: 3, type: 'Close Up', position: 'top-16 left-64 z-30', rotation: '-rotate-1', size: 'w-48 h-64', link: 'Model3.jpg' },
-  { id: 4, type: 'Left Profile', position: 'top-4 left-96 z-20', rotation: 'rotate-2', size: 'w-40 h-56', link: 'Model4.jpg' },
-  { id: 5, type: 'Right Profile', position: 'top-12 left-[29rem] z-10', rotation: '-rotate-3', size: 'w-44 h-60', link: 'Model5.jpg' },
+  { id: 1, type: 'Full Length', position: 'top-0 left-0 z-10', rotation: '-rotate-3', size: 'w-48 h-64', link: 'Model3.jpeg' },
+  { id: 2, type: 'Waist Length', position: 'top-8 left-32 z-20', rotation: 'rotate-2', size: 'w-44 h-60', link: 'Model9.jpeg' },
+  { id: 3, type: 'Close Up', position: 'top-16 left-64 z-30', rotation: '-rotate-1', size: 'w-48 h-64', link: 'Model8.jpeg' },
+  { id: 4, type: 'Left Profile', position: 'top-4 left-96 z-20', rotation: 'rotate-2', size: 'w-40 h-56', link: 'Model7.jpeg' },
+  { id: 5, type: 'Right Profile', position: 'top-12 left-[29rem] z-10', rotation: 'rotate-3', size: 'w-44 h-60', link: 'Model2.jpeg' },
 ];
 
 export default function Model3DShowcase() {
@@ -42,7 +42,7 @@ export default function Model3DShowcase() {
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
-        start: 'top top',
+        start: 'top top', // When the top of the section hits the top of the viewport
         end: '+=200%', // Pin for 200% of viewport height (gives time for all animations)
         pin: true,
         scrub: 1,
@@ -118,9 +118,9 @@ export default function Model3DShowcase() {
                 transition={{ delay: index * 0.1, duration: 0.5 }}
                 className="flex items-start gap-4"
               >
-                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">
+                {/* <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">
                   {feature.icon}
-                </div>
+                </div> */}
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">{feature.title}</h3>
                   <p className="text-gray-600 text-sm">{feature.desc}</p>
@@ -144,7 +144,7 @@ export default function Model3DShowcase() {
           {MODEL_POSES.map((pose, index) => (
             <div
               key={pose.id}
-              className={`model-image absolute ${pose.position} ${pose.size} ${pose.rotation} cursor-pointer group`}
+              className={`model-image absolute ${pose.position} ${pose.size} ${pose.rotation} cursor-pointer group mt-14`}
               style={{ willChange: 'transform, opacity' }}
             >
               <div className="w-full h-full bg-gray-200 rounded-2xl overflow-hidden shadow-xl group-hover:shadow-2xl transition-shadow duration-300">
@@ -153,9 +153,11 @@ export default function Model3DShowcase() {
                     src={`/stock/${pose.link}`}
                     width={192}
                     height={256}
-                    className={`${pose.size} object-contain`}
                     alt={`Professional model - ${pose.type}`}
-                    loading="lazy"
+                    className="object-cover w-full h-full"
+                    quality={90}
+                    loading={index === 2 ? "eager" : "lazy"}
+                    priority={index === 2}
                     placeholder="blur"
                     blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBEQCEAwEPwAB/wD/Z"
                   />
