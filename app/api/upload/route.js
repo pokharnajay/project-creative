@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
 import { nanoid } from 'nanoid';
 
+// Supabase storage bucket name
+const STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'imageai';
+
 export async function POST(request) {
   try {
     // Get authenticated user from Supabase
@@ -62,9 +65,9 @@ export async function POST(request) {
       }
     }
 
-    // Use Supabase Storage as fallback
+    // Use Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('uploads')
+      .from(STORAGE_BUCKET)
       .upload(fileName, buffer, {
         contentType: file.type,
         upsert: false,
@@ -72,25 +75,32 @@ export async function POST(request) {
 
     if (uploadError) {
       console.error('Supabase storage error:', uploadError);
+
       // Check for common errors
-      if (uploadError.message?.includes('not found') || uploadError.statusCode === '404') {
+      if (uploadError.message?.includes('Bucket not found') ||
+          uploadError.message?.includes('not found') ||
+          uploadError.statusCode === '404') {
         return NextResponse.json(
-          { error: 'Storage bucket not configured. Please create "uploads" bucket in Supabase.' },
+          { error: `Storage bucket "${STORAGE_BUCKET}" not found. Please create it in Supabase.` },
           { status: 500 }
         );
       }
-      if (uploadError.message?.includes('row-level security') || uploadError.message?.includes('policy')) {
+
+      if (uploadError.message?.includes('row-level security') ||
+          uploadError.message?.includes('policy') ||
+          uploadError.message?.includes('not authorized')) {
         return NextResponse.json(
-          { error: 'Storage permissions not configured. Please check Supabase storage policies.' },
+          { error: 'Storage permissions error. Please check Supabase storage policies.' },
           { status: 500 }
         );
       }
+
       throw uploadError;
     }
 
     // Get public URL
     const { data: { publicUrl } } = supabase.storage
-      .from('uploads')
+      .from(STORAGE_BUCKET)
       .getPublicUrl(fileName);
 
     return NextResponse.json({ url: publicUrl });
