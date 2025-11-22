@@ -68,16 +68,17 @@ export default function GeneratePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Generate AI Images</h1>
-          <p className="text-gray-600">
-            Upload your product and optionally a model to create professional advertising images
-          </p>
-        </div>
+      <main className="bg-gray-50/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold text-gray-900 mb-2">Generate AI Images</h1>
+            <p className="text-gray-500 text-sm">
+              Upload your product and optionally a model to create professional advertising images
+            </p>
+          </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Upload & Settings */}
@@ -118,7 +119,7 @@ export default function GeneratePage() {
                     <select
                       value={numVariations}
                       onChange={(e) => setNumVariations(parseInt(e.target.value))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all cursor-pointer"
                     >
                       <option value={1}>1 image (5 credits)</option>
                       <option value={2}>2 images (10 credits)</option>
@@ -135,14 +136,14 @@ export default function GeneratePage() {
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
                       placeholder="Describe the style, setting, and mood for your image. E.g., 'Professional studio lighting, modern minimalist background, fashion magazine style'"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all resize-none text-gray-900 placeholder-gray-400"
                       rows={5}
                     />
                   </div>
 
                   {error && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-sm text-red-600">{error}</p>
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
+                      <p className="text-sm text-red-700">{error}</p>
                     </div>
                   )}
 
@@ -176,7 +177,7 @@ export default function GeneratePage() {
                   </div>
                 ) : generatedImages.length > 0 ? (
                   <div className="space-y-4">
-                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
                       <p className="text-green-800 font-medium">
                         Successfully generated {generatedImages.length} image(s)!
                       </p>
@@ -190,7 +191,7 @@ export default function GeneratePage() {
                           key={index}
                           src={image.url}
                           alt={`Generated ${index + 1}`}
-                          className="w-full rounded-lg shadow-md"
+                          className="w-full rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
                         />
                       ))}
                     </div>
@@ -206,18 +207,18 @@ export default function GeneratePage() {
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth={2}
+                        strokeWidth={1.5}
                         d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                       />
                     </svg>
-                    <p>No images generated yet</p>
+                    <p className="text-sm">No images generated yet</p>
                   </div>
                 )}
               </CardContent>
             </Card>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

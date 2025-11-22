@@ -19,31 +19,29 @@ export default function LandingFooter() {
   };
 
   return (
-    <footer className="bg-gray-900 from-gray-50 to-white border-t border-gray-200">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-16 pl-0">
+    <footer className="bg-gray-900 border-t border-gray-800">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-4 gap-12"
+          className="flex flex-col md:flex-row md:items-center md:justify-between gap-8"
         >
           {/* Brand */}
-          <motion.div variants={itemVariants} className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-2xl">AI</span>
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                ImageGen
-              </span>
+          <motion.div variants={itemVariants} className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
+              <span className="text-gray-900 font-bold text-lg">AI</span>
             </div>
-            <p className="text-gray-100 mb-0 max-w-md">
-              Transform your product photography with AI. Create stunning professional images in
-              seconds with our advanced image generation platform.
-            </p>
+            <span className="text-xl font-semibold text-white">
+              ImageGen
+            </span>
           </motion.div>
 
+          {/* Description */}
+          <motion.p variants={itemVariants} className="text-gray-400 text-sm max-w-md">
+            Transform your product photography with AI. Create stunning professional images in seconds.
+          </motion.p>
         </motion.div>
 
         {/* Bottom Bar */}
@@ -52,14 +50,13 @@ export default function LandingFooter() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="mt-12 pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4"
+          className="mt-8 pt-8 border-t border-gray-800"
         >
-          <p className="text-gray-600 text-sm text-center mx-auto">
+          <p className="text-gray-500 text-sm text-center">
             &copy; 2025 AI ImageGen. All rights reserved.
           </p>
         </motion.div>
       </div>
-       
     </footer>
   );
 }

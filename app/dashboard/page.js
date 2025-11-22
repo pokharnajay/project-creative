@@ -12,7 +12,7 @@ export default function DashboardPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
 
       <div className="flex-1 flex overflow-hidden">
@@ -21,21 +21,21 @@ export default function DashboardPage() {
           onSelectFolder={setSelectedFolder}
         />
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex justify-between items-center mb-6">
+        <main className="flex-1 overflow-y-auto bg-gray-50/50">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+            <div className="flex justify-between items-center mb-8">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">My Images</h1>
-                <p className="text-gray-600 mt-1">
+                <h1 className="text-2xl font-semibold text-gray-900">My Images</h1>
+                <p className="text-gray-500 mt-1 text-sm">
                   {selectedFolder === 'all'
-                    ? 'All generated images'
+                    ? 'All your generated images'
                     : 'Images in this folder'}
                 </p>
               </div>
               <Button onClick={() => router.push('/generate')}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
+                  className="h-4 w-4 mr-2"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"

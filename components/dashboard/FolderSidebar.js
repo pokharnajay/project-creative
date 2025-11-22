@@ -84,8 +84,8 @@ export default function FolderSidebar({ selectedFolder, onSelectFolder }) {
 
   return (
     <>
-      <div className="w-64 bg-white border-r border-gray-200 h-full overflow-y-auto">
-        <div className="p-4 border-b border-gray-200">
+      <div className="w-60 bg-white border-r border-gray-100 h-full overflow-y-auto">
+        <div className="p-4">
           <Button
             onClick={() => setShowCreateModal(true)}
             size="sm"
@@ -109,19 +109,23 @@ export default function FolderSidebar({ selectedFolder, onSelectFolder }) {
           </Button>
         </div>
 
-        <div className="p-2">
+        <div className="px-2 pb-4">
+          <p className="px-3 py-2 text-xs font-medium text-gray-400 uppercase tracking-wider">
+            Collections
+          </p>
+
           <button
             onClick={() => onSelectFolder('all')}
-            className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+            className={`w-full text-left px-3 py-2.5 rounded-xl transition-colors cursor-pointer ${
               selectedFolder === 'all'
-                ? 'bg-blue-50 text-blue-700'
+                ? 'bg-gray-900 text-white'
                 : 'hover:bg-gray-100 text-gray-700'
             }`}
           >
             <div className="flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-2"
+                className="h-5 w-5 mr-3"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -129,30 +133,30 @@ export default function FolderSidebar({ selectedFolder, onSelectFolder }) {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
+                  strokeWidth={1.5}
                   d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              All Images
+              <span className="text-sm font-medium">All Images</span>
             </div>
           </button>
 
           {folders.map((folder) => (
             <div
               key={folder.id}
-              className={`group flex items-center justify-between px-3 py-2 rounded-lg transition-colors cursor-pointer ${
+              className={`group flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors cursor-pointer ${
                 selectedFolder === folder.id
-                  ? 'bg-blue-50 text-blue-700'
+                  ? 'bg-gray-900 text-white'
                   : 'hover:bg-gray-100 text-gray-700'
               }`}
             >
               <div
-                className="flex items-center flex-1"
+                className="flex items-center flex-1 cursor-pointer"
                 onClick={() => onSelectFolder(folder.id)}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
+                  className="h-5 w-5 mr-3"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -160,18 +164,22 @@ export default function FolderSidebar({ selectedFolder, onSelectFolder }) {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    strokeWidth={1.5}
                     d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
                   />
                 </svg>
-                <span className="truncate">{folder.name}</span>
+                <span className="truncate text-sm font-medium">{folder.name}</span>
               </div>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDeleteFolder(folder.id);
                 }}
-                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded text-red-600 transition-all"
+                className={`opacity-0 group-hover:opacity-100 p-1.5 rounded-lg transition-all cursor-pointer ${
+                  selectedFolder === folder.id
+                    ? 'hover:bg-white/20 text-white'
+                    : 'hover:bg-red-50 text-red-500'
+                }`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -201,7 +209,7 @@ export default function FolderSidebar({ selectedFolder, onSelectFolder }) {
         <ModalContent>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Folder Name
               </label>
               <Input
@@ -212,7 +220,7 @@ export default function FolderSidebar({ selectedFolder, onSelectFolder }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Description (optional)
               </label>
               <Input
@@ -224,11 +232,11 @@ export default function FolderSidebar({ selectedFolder, onSelectFolder }) {
           </div>
         </ModalContent>
         <ModalFooter>
-          <Button variant="secondary" onClick={() => setShowCreateModal(false)}>
+          <Button variant="outline" onClick={() => setShowCreateModal(false)}>
             Cancel
           </Button>
           <Button onClick={handleCreateFolder} loading={loading}>
-            Create
+            Create Folder
           </Button>
         </ModalFooter>
       </Modal>

@@ -25,6 +25,19 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Cursor pointer for all clickable elements */
+button,
+a,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+input[type="checkbox"],
+input[type="radio"],
+select,
+.clickable {
+  cursor: pointer;
+}
+
 /* Locomotive Scroll Styles */
 html.has-scroll-smooth {
   overflow: hidden;
@@ -70,7 +83,7 @@ html.has-scroll-dragging {
   position: absolute;
   top: 0;
   right: 0;
-  background-color: #6366f1;
+  background-color: #18181b;
   opacity: 0.5;
   width: 7px;
   border-radius: 10px;
@@ -84,20 +97,26 @@ html.has-scroll-dragging {
   cursor: grabbing;
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Gray Theme */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #f4f4f5;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #6366f1;
-  border-radius: 5px;
+  background: #a1a1aa;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4f46e5;
+  background: #71717a;
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid #18181b;
+  outline-offset: 2px;
 }
