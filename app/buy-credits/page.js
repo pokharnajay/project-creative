@@ -113,7 +113,7 @@ export default function BuyCreditsPage() {
         key: orderData.keyId,
         amount: orderData.amountInr * 100,
         currency: 'INR',
-        name: 'AI Image Studio',
+        name: 'AI ImageGen',
         description: `Purchase ${orderData.credits} Credits`,
         order_id: orderData.orderId,
         prefill: {

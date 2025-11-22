@@ -53,7 +53,7 @@ export default function LandingHeader() {
               <span className="text-white font-bold text-xl">AI</span>
             </div>
             <span className="text-xl font-bold text-gray-900">
-              Image Studio
+              ImageGen
             </span>
           </motion.div>
 

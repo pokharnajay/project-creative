@@ -1,4 +1,4 @@
-# AI Image Studio - Setup Guide
+# AI ImageGen - Setup Guide
 
 This comprehensive guide will walk you through setting up the entire AI Image Generation platform from scratch.
 
@@ -116,7 +116,7 @@ The schema already includes RLS policies, but verify they're active:
 2. Click "Create Service Account"
 3. Enter details:
    - **Name**: `ai-image-studio-sa`
-   - **Description**: Service account for AI Image Studio
+   - **Description**: Service account for AI ImageGen
 4. Click "Create and Continue"
 5. Grant role: "Storage Object Admin"
 6. Click "Continue" then "Done"
@@ -144,7 +144,7 @@ The schema already includes RLS policies, but verify they're active:
 2. Choose "External" user type
 3. Click "Create"
 4. Fill in the application details:
-   - **App name**: AI Image Studio
+   - **App name**: AI ImageGen
    - **User support email**: Your email
    - **App logo**: Optional
    - **Application home page**: `http://localhost:3000` (for dev)
@@ -166,7 +166,7 @@ The schema already includes RLS policies, but verify they're active:
 2. Click "Create Credentials" > "OAuth client ID"
 3. Choose "Web application"
 4. Configure:
-   - **Name**: AI Image Studio Web Client
+   - **Name**: AI ImageGen Web Client
    - **Authorized JavaScript origins**:
      - `http://localhost:3000` (development)
      - `https://yourdomain.com` (production - add later)
@@ -407,4 +407,4 @@ Before deploying to production:
 
 ---
 
-Congratulations! Your AI Image Studio is now set up and ready to use! 🎉
+Congratulations! Your AI ImageGen is now set up and ready to use! 🎉
