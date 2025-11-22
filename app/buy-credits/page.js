@@ -4,21 +4,19 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
 import Navbar from '@/components/dashboard/Navbar';
-import Button from '@/components/ui/Button';
-import Card, { CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { formatDistanceToNow } from 'date-fns';
 
 const CREDITS_PER_DOLLAR = 100;
 const MIN_AMOUNT = 1;
 const MAX_AMOUNT = 9999;
 
-// Popular packages for quick selection
-const POPULAR_PACKAGES = [
-  { amount: 5, credits: 500, popular: false },
+// Credit packages
+const PACKAGES = [
+  { amount: 5, credits: 500 },
   { amount: 10, credits: 1000, popular: true },
-  { amount: 25, credits: 2500, popular: false },
-  { amount: 50, credits: 5000, popular: false },
-  { amount: 100, credits: 10000, popular: false },
+  { amount: 25, credits: 2500 },
+  { amount: 50, credits: 5000 },
+  { amount: 100, credits: 10000 },
 ];
 
 export default function BuyCreditsPage() {
@@ -33,20 +31,17 @@ export default function BuyCreditsPage() {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(true);
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.push('/auth/signin?redirect=/buy-credits');
     }
   }, [authLoading, isAuthenticated, router]);
 
-  // Fetch payment history
   const fetchPaymentHistory = useCallback(async () => {
     try {
       setHistoryLoading(true);
       const response = await fetch('/api/payments/history?limit=10');
       const data = await response.json();
-
       if (response.ok) {
         setPaymentHistory(data.payments || []);
       }
@@ -63,7 +58,6 @@ export default function BuyCreditsPage() {
     }
   }, [isAuthenticated, fetchPaymentHistory]);
 
-  // Update credits when amount changes
   useEffect(() => {
     const calculatedCredits = Math.floor(amount * CREDITS_PER_DOLLAR);
     setCredits(calculatedCredits);
@@ -71,16 +65,12 @@ export default function BuyCreditsPage() {
 
   const handleAmountChange = (e) => {
     const value = e.target.value;
-
-    // Allow empty input for typing
     if (value === '') {
       setAmount('');
       setCredits(0);
       return;
     }
-
     const numValue = parseFloat(value);
-
     if (!isNaN(numValue)) {
       setAmount(numValue);
     }
@@ -96,7 +86,6 @@ export default function BuyCreditsPage() {
       setError(null);
       setSuccess(null);
 
-      // Validate amount
       if (!amount || amount < MIN_AMOUNT || amount > MAX_AMOUNT) {
         setError(`Amount must be between $${MIN_AMOUNT} and $${MAX_AMOUNT}`);
         return;
@@ -104,12 +93,9 @@ export default function BuyCreditsPage() {
 
       setLoading(true);
 
-      // Create order
       const orderResponse = await fetch('/api/payments/create-order', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amountUsd: parseFloat(amount) }),
       });
 
@@ -119,32 +105,38 @@ export default function BuyCreditsPage() {
         throw new Error(orderData.error || 'Failed to create order');
       }
 
-      // Load Razorpay script if not loaded
       if (!window.Razorpay) {
         await loadRazorpayScript();
       }
 
-      // Open Razorpay checkout
       const options = {
         key: orderData.keyId,
-        amount: orderData.amountInr * 100, // Amount in paise
+        amount: orderData.amountInr * 100,
         currency: 'INR',
-        name: 'AI Image Studio',
+        name: 'AI ImageGen',
         description: `Purchase ${orderData.credits} Credits`,
         order_id: orderData.orderId,
         prefill: {
           name: orderData.prefill?.name || '',
           email: orderData.prefill?.email || '',
         },
-        theme: {
-          color: '#4F46E5',
-        },
-        handler: async function (response) {
-          // Verify payment
-          await verifyPayment(response);
+        theme: { color: '#18181b' },
+        handler: function (response) {
+          // Use .then().catch() instead of async/await for better compatibility
+          console.log('Razorpay handler called with:', response);
+          verifyPayment(response)
+            .then(() => {
+              console.log('verifyPayment completed successfully');
+            })
+            .catch((err) => {
+              console.error('verifyPayment error in handler:', err);
+              setError('Payment verification failed. Please refresh and check your credits.');
+              setLoading(false);
+            });
         },
         modal: {
           ondismiss: function () {
+            console.log('Razorpay modal dismissed');
             setLoading(false);
           },
         },
@@ -163,9 +155,7 @@ export default function BuyCreditsPage() {
     try {
       const verifyResponse = await fetch('/api/payments/verify', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           razorpay_order_id: razorpayResponse.razorpay_order_id,
           razorpay_payment_id: razorpayResponse.razorpay_payment_id,
@@ -179,17 +169,11 @@ export default function BuyCreditsPage() {
         throw new Error(verifyData.error || 'Payment verification failed');
       }
 
-      setSuccess(`Successfully purchased ${verifyData.creditsAdded} credits! Your new balance is ${verifyData.totalCredits} credits.`);
-
-      // Refresh user profile to update credits
-      await refreshProfile();
-
-      // Refresh payment history
-      await fetchPaymentHistory();
+      // Payment successful - reload page to show updated credits
+      window.location.reload();
     } catch (err) {
       console.error('Error verifying payment:', err);
-      setError(err.message || 'Payment verification failed. Please contact support if credits were not added.');
-    } finally {
+      setError(err.message || 'Payment verification failed. Please contact support.');
       setLoading(false);
     }
   };
@@ -204,244 +188,207 @@ export default function BuyCreditsPage() {
     });
   };
 
-  const getStatusBadgeClass = (status) => {
+  const getStatusStyle = (status) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-50 text-green-700 border-green-200';
       case 'failed':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-50 text-red-700 border-red-200';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'refunded':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200';
       default:
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-gray-900"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-28">
+        {/* Header */}
+        <div className="mb-10">
           <h1 className="text-3xl font-bold text-gray-900">Buy Credits</h1>
-          <p className="text-gray-600 mt-1">
-            Purchase credits to generate more AI images
+          <p className="text-gray-500 mt-2">
+            Purchase credits to generate AI-powered images
           </p>
         </div>
 
-        {/* Current Balance */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg p-6 mb-8 text-white">
-          <div className="flex justify-between items-center">
+        {/* Current Balance Card */}
+        <div className="border border-gray-200 rounded-xl p-6 mb-10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <p className="text-indigo-100 text-sm">Current Balance</p>
-              <p className="text-4xl font-bold">{profile?.credits || 0}</p>
-              <p className="text-indigo-100 text-sm">credits</p>
+              <p className="text-sm text-gray-500 uppercase tracking-wide font-medium">Current Balance</p>
+              <p className="text-4xl font-bold text-gray-900 mt-1">
+                {(profile?.credits || 0).toLocaleString()}
+                <span className="text-lg font-normal text-gray-500 ml-2">credits</span>
+              </p>
             </div>
             <div className="text-right">
-              <p className="text-indigo-100 text-sm">Rate</p>
-              <p className="text-xl font-semibold">$1 = 100 credits</p>
+              <p className="text-sm text-gray-500">Exchange Rate</p>
+              <p className="text-lg font-medium text-gray-900">$1 = 100 credits</p>
             </div>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Purchase Form */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Purchase Credits</CardTitle>
-              <CardDescription>
-                Enter an amount or select a package
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md text-sm mb-4">
-                  {error}
-                </div>
-              )}
+        {/* Alerts */}
+        {error && (
+          <div className="mb-6 px-4 py-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
+            {error}
+          </div>
+        )}
 
-              {success && (
-                <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-md text-sm mb-4">
-                  {success}
-                </div>
-              )}
+        {success && (
+          <div className="mb-6 px-4 py-3 rounded-lg border border-green-200 bg-green-50 text-green-700 text-sm">
+            {success}
+          </div>
+        )}
 
-              {/* Popular Packages */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Quick Select
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {POPULAR_PACKAGES.map((pkg) => (
-                    <button
-                      key={pkg.amount}
-                      onClick={() => selectPackage(pkg.amount)}
-                      className={`p-3 rounded-lg border-2 transition-all ${
-                        amount === pkg.amount
-                          ? 'border-indigo-600 bg-indigo-50'
-                          : 'border-gray-200 hover:border-indigo-300'
-                      } ${pkg.popular ? 'ring-2 ring-indigo-200' : ''}`}
-                    >
-                      <div className="font-semibold text-gray-900">${pkg.amount}</div>
-                      <div className="text-sm text-gray-500">{pkg.credits} credits</div>
-                      {pkg.popular && (
-                        <div className="text-xs text-indigo-600 font-medium mt-1">Popular</div>
-                      )}
-                    </button>
-                  ))}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Purchase Section */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Package Selection */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Select Amount</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {PACKAGES.map((pkg) => (
+                  <button
+                    key={pkg.amount}
+                    onClick={() => selectPackage(pkg.amount)}
+                    className={`relative p-4 rounded-xl border-2 transition-all duration-200 ${
+                      amount === pkg.amount
+                        ? 'border-gray-900 bg-gray-50'
+                        : 'border-gray-200 hover:border-gray-400'
+                    }`}
+                  >
+                    {pkg.popular && (
+                      <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-gray-900 text-white text-xs font-medium rounded-full">
+                        Popular
+                      </span>
+                    )}
+                    <div className="text-xl font-bold text-gray-900">${pkg.amount}</div>
+                    <div className="text-sm text-gray-500 mt-1">{pkg.credits.toLocaleString()}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Amount */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Or enter custom amount
+              </label>
+              <div className="relative max-w-xs">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
+                <input
+                  type="number"
+                  min={MIN_AMOUNT}
+                  max={MAX_AMOUNT}
+                  step="1"
+                  value={amount}
+                  onChange={handleAmountChange}
+                  className="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all"
+                  placeholder="Enter amount"
+                />
+              </div>
+              <p className="text-xs text-gray-400 mt-2">
+                Minimum: ${MIN_AMOUNT} | Maximum: ${MAX_AMOUNT.toLocaleString()}
+              </p>
+            </div>
+
+            {/* Summary & Purchase */}
+            <div className="border border-gray-200 rounded-xl p-6 bg-gray-50">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-sm text-gray-500">You will receive</p>
+                  <p className="text-3xl font-bold text-gray-900">{credits.toLocaleString()} credits</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-gray-500">Amount</p>
+                  <p className="text-2xl font-bold text-gray-900">${amount || 0}</p>
                 </div>
               </div>
 
-              {/* Custom Amount */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Custom Amount (USD)
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                  <input
-                    type="number"
-                    min={MIN_AMOUNT}
-                    max={MAX_AMOUNT}
-                    step="1"
-                    value={amount}
-                    onChange={handleAmountChange}
-                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Enter amount"
-                  />
-                </div>
-                <p className="text-sm text-gray-500 mt-1">
-                  Min: ${MIN_AMOUNT}, Max: ${MAX_AMOUNT}
-                </p>
-              </div>
-
-              {/* Credits Calculator */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">You will receive:</span>
-                  <span className="text-2xl font-bold text-indigo-600">
-                    {credits.toLocaleString()} credits
-                  </span>
-                </div>
-              </div>
-
-              {/* Buy Button */}
-              <Button
+              <button
                 onClick={handleBuyCredits}
                 disabled={loading || !amount || amount < MIN_AMOUNT || amount > MAX_AMOUNT}
-                className="w-full"
-                size="lg"
+                className="w-full py-4 px-6 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors duration-200 flex items-center justify-center gap-2"
               >
                 {loading ? (
-                  <span className="flex items-center justify-center gap-2">
+                  <>
                     <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                        fill="none"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
                     Processing...
-                  </span>
+                  </>
                 ) : (
-                  `Buy ${credits.toLocaleString()} Credits for $${amount || 0}`
+                  <>
+                    Purchase Credits
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </>
                 )}
-              </Button>
+              </button>
 
-              <p className="text-xs text-gray-500 mt-4 text-center">
-                Payments are processed securely via Razorpay.
-                <br />
-                Supports UPI, Credit/Debit Cards (Domestic & International)
+              <p className="text-xs text-gray-400 mt-4 text-center">
+                Secure payment via Razorpay. Supports UPI, Cards & Net Banking.
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Payment History */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Purchase History</CardTitle>
-              <CardDescription>
-                Your recent credit purchases
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Purchase History</h2>
+            <div className="border border-gray-200 rounded-xl overflow-hidden">
               {historyLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <div className="flex justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-gray-900"></div>
                 </div>
               ) : paymentHistory.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <svg
-                    className="mx-auto h-12 w-12 text-gray-400 mb-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                    />
-                  </svg>
-                  <p>No purchases yet</p>
-                  <p className="text-sm">Your payment history will appear here</p>
+                <div className="text-center py-12 px-4">
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-500 text-sm">No purchases yet</p>
+                  <p className="text-gray-400 text-xs mt-1">Your history will appear here</p>
                 </div>
               ) : (
-                <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
                   {paymentHistory.map((payment) => (
-                    <div
-                      key={payment.id}
-                      className="border border-gray-200 rounded-lg p-4"
-                    >
+                    <div key={payment.id} className="p-4 hover:bg-gray-50 transition-colors">
                       <div className="flex justify-between items-start">
                         <div>
-                          <div className="font-medium text-gray-900">
-                            {payment.credits_purchased?.toLocaleString()} credits
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            ${payment.amount_usd}
-                          </div>
+                          <p className="font-medium text-gray-900">
+                            +{payment.credits_purchased?.toLocaleString()} credits
+                          </p>
+                          <p className="text-sm text-gray-500">${payment.amount_usd}</p>
                         </div>
-                        <span
-                          className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeClass(
-                            payment.status
-                          )}`}
-                        >
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusStyle(payment.status)}`}>
                           {payment.status}
                         </span>
                       </div>
-                      <div className="text-xs text-gray-400 mt-2">
+                      <p className="text-xs text-gray-400 mt-2">
                         {payment.created_at &&
-                          formatDistanceToNow(new Date(payment.created_at), {
-                            addSuffix: true,
-                          })}
-                      </div>
+                          formatDistanceToNow(new Date(payment.created_at), { addSuffix: true })}
+                      </p>
                     </div>
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </main>
     </div>

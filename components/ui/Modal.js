@@ -22,12 +22,12 @@ export default function Modal({ isOpen, onClose, children, className }) {
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity cursor-pointer"
           onClick={onClose}
         />
         <div
           className={cn(
-            'relative bg-white rounded-xl shadow-xl max-w-lg w-full p-6 z-10',
+            'relative bg-white rounded-2xl max-w-lg w-full p-6 z-10 shadow-xl',
             className
           )}
         >
@@ -51,7 +51,7 @@ export function ModalTitle({ children, className }) {
 }
 
 export function ModalContent({ children, className }) {
-  return <div className={cn('', className)}>{children}</div>;
+  return <div className={cn('text-gray-600', className)}>{children}</div>;
 }
 
 export function ModalFooter({ children, className }) {

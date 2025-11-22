@@ -77,7 +77,7 @@ export default function ImageUploadBox({ onUpload, label, existingImage }) {
         {...getRootProps()}
         className={cn(
           'relative border-2 border-dashed rounded-xl p-6 transition-all cursor-pointer',
-          isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400',
+          isDragActive ? 'border-gray-900 bg-gray-100' : 'border-gray-200 hover:border-gray-400',
           preview ? 'bg-gray-50' : 'bg-white'
         )}
       >
@@ -97,7 +97,7 @@ export default function ImageUploadBox({ onUpload, label, existingImage }) {
             />
             <button
               onClick={handleRemove}
-              className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition-colors"
+              className="absolute top-2 right-2 bg-gray-900 text-white p-2 rounded-full hover:bg-gray-700 transition-colors cursor-pointer"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

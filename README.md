@@ -1,4 +1,4 @@
-# AI Image Studio
+# AI ImageGen
 
 A professional AI-powered image generation platform for creating stunning product advertising images. Upload your products, optionally add models, and generate professional photoshoots with AI.
 

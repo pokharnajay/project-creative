@@ -13,15 +13,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "AI Image Studio - Generate Professional Product Images",
+  title: "AI ImageGen - Generate Professional Product Images",
   description: "Create stunning AI-generated product images with models. Professional advertising photos powered by AI.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         <AuthProvider>{children}</AuthProvider>
       </body>
