@@ -121,11 +121,22 @@ export default function BuyCreditsPage() {
           email: orderData.prefill?.email || '',
         },
         theme: { color: '#18181b' },
-        handler: async function (response) {
-          await verifyPayment(response);
+        handler: function (response) {
+          // Use .then().catch() instead of async/await for better compatibility
+          console.log('Razorpay handler called with:', response);
+          verifyPayment(response)
+            .then(() => {
+              console.log('verifyPayment completed successfully');
+            })
+            .catch((err) => {
+              console.error('verifyPayment error in handler:', err);
+              setError('Payment verification failed. Please refresh and check your credits.');
+              setLoading(false);
+            });
         },
         modal: {
           ondismiss: function () {
+            console.log('Razorpay modal dismissed');
             setLoading(false);
           },
         },
