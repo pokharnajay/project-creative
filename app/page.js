@@ -356,30 +356,44 @@ export default function Home() {
       </section>
 
       {/* Model Showcase Section */}
-      <section id="models" ref={modelsRef} className="py-24 bg-[rgba(0,0,0,0.13)] ">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="section-content">
-            <Model3DShowcase />
-          </div>
-        </div>
+      <section id="models" ref={modelsRef} className="bg-[rgba(0,0,0,0.13)]">
+        <Model3DShowcase />
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-24  bg-white relative overflow-hidden">
+      <section className="min-h-[75vh] max-h-[75vh] bg-white relative overflow-hidden flex items-center justify-center">
         <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            initial={{ opacity: 0, y: 60, scale: 0.95 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 1, ease: 'easeOut' }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <motion.h2
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.5 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="text-4xl md:text-5xl font-bold text-gray-900 mb-6"
+            >
               Ready to Transform Your Product Photography?
-            </h2>
-            <p className="text-xl text-gray-600 mb-10">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.5 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-xl text-gray-600 mb-10"
+            >
               Join thousands of creators and businesses using AI to create stunning visuals
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.5 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center"
+            >
               <Button
                 size="lg"
                 onClick={() => router.push(isAuthenticated ? '/dashboard' : '/auth/signin')}
@@ -394,9 +408,16 @@ export default function Home() {
               >
                 View Pricing
               </Button> */}
-            </div>
-            {/* <p className="text-gray-400 mt-6">No credit card required • 100 free credits • Cancel anytime</p> */}
-            <p className="text-gray-800 mt-6 font-medium">No credit card required • 100 free credits</p>
+            </motion.div>
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: false, amount: 0.5 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="text-gray-800 mt-6 font-medium"
+            >
+              No credit card required • 100 free credits
+            </motion.p>
           </motion.div>
         </div>
       </section>
